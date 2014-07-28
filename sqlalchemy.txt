@@ -1,0 +1,36 @@
+psycopg2 api flow :
+connection = psycopg2.connect("user","pass","dbname")
+cur = connection.cursor()
+cur.execute('sql query')
+data = cur.fetchone()[0]
+cur.close() # close cursor before next sql query
+connection.commit()
+
+*Bound parameters : emp_id is a bound parameter here and subsctituion is taen care by driver such as psycopg2
+cur.execute("select * from emptable  where employee_id = %(emp_id)",{'emp_id':5})
+
+* engine = create_engine("sqlite:///some.db") # Create Engine with lazy initilization
+result = engine.execute('select name from emp where emp_id=%(emp_id)',emp_id=3)
+row = result.fetchone() #returns a rowProxy which is a tuple which also acs like a dict and gives values based on key likes row['emp_id']
+
+* results close automatically when all rows are exhausted, but we can  |
+| also close explicitly. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,105 @@
+*struct
+v=5 ; import struct ; s = struct.Struct('I 2s f') #Argument should be format specifier
+v2=s.pack(v) # converts into binary
+s.unpack(v2) # converts into relevant data type
+
+*shelve
+used to internally pickle objects in key value pair . import shelve
+s = shelve.open('test.db')
+s['k1'] = range(10)
+s.close()
+
+*For large amounts of data, it may be more efficient to use an array instead of a list, ex: import array ; a = array.array('i',range(10)) #i is code representing integer
+Only difference between list and array is array hols only same data type
+
+*heapq and bisect are used to generate lists in sorted order when the list is changing continuously
+In [88]: for i in range(1,20):
+    r = random.randint(1,100)
+    bisect.insort(l,r) # this inserts the randm number in sorted order.
+
+*list is not thread safe hence use Queue for queue operations even though list can easily simulate a Queue with insert and remove. multiprocessing.Queue even has a version to work with multiple processes.
+ Queue.LifoQueue is the stack implementation.
+Queue provides   q.task_done() method supposed to be called after get to notify other threads that processing is done for last get.
+
+**Collections : Deque, namedtuple,ordereddict,defaultdict,Counter
+*Deque is a double ended  queue with methods like pop,popleft,append,appendleft,extend,extendleft , rotate,rotateleft. Important application undo/redo functionality in applications.
+*defaultdict is used to assign and add key value pairs into dict when accessed and key not present in the dict. for ex: d = defaultdict(int); d = {'s1':1} ; accessing d['s2'] adds 0 as value in the dict. We can even have custom methods just like int is being used here.
+*A Counter is a container that keeps track of how many times equivalent values are added. 
+c = collections.Counter('extremely')
+In [4]: c
+Out[4]: Counter({'e': 3, 'm': 1, 'l': 1, 'r': 1, 't': 1, 'y': 1, 'x': 1})
+*An OrderedDict is a dictionary subclass that remembers the order in which its contents are added.
+*namedtuple instances are just as memory efficient as regular tuples because they  do not have per-instance dictionaries. 
+In [5]: p = collections.namedtuple('p','name age')
+In [6]: p1 = p('simon',30)
+
+
+*os.path can be used to split dir and file names file extensions expand env variables, normalise paths, get create modifytime 
+os.stat give stats like permission etc abt the file
+
+*The fileinput module is a framework for creating command line programs for processing text files in a filter-ish manner, no need to worry at opening file reading line by line and related error handling. Pg.268 , fileinput.input()
+
+*linecache can be used to extract specific lines from files , it even uses its own cache for efficient retirieval of content . linecache.getline('sim.txt', 5)
+
+*The tempfile module provides several functions for creating filesystem resources  ecurely. TemporaryFile() opens and returns an un-named file,  NamedTemporaryFile()  , t1 = tempfile.NamedTemporaryFile()
+
+*shutil.copyfile , copyfileobject, copy , copy2 used to make a copy of the file. 
+move to move file 
+copystat copies all stats from f1 to f2 , copymode copies permission.
+copytree , rmtree - recursive directory operations
+
+*dircache provided listdir method to list the contents of directory , it also caches the entries for next time use. if the timstamp in dir changes only then it updates the cache.
+
+***Pg.11 - Types of Exceptions  and Warning *** Must Read ***
+
+Unicode ; https://docs.python.org/2/howto/unicode.html
+Theory:
+'''
+BOM = Byte order mark
+255254 at the beginning means little endian
+254255 means big endian
+UTF-8 can go upto 8 bytes . If the 1st bit is 0 then its a 1 byte character.The 1st  byte is called leading byte and subsequent bytes called continuation bytes. Leading byte gives the info on how many continuation bytes  needs to be read. For example if 1st byte has 110XXXXX 10XXXXXX then the number of 1's in 1st byte show the number of bytes ie 2.
+Unicode != UTF-8 , Unicode is mapping from symbol to codepoint. UTF-8 is the binary representation of the codepoint.
+So when u want to convert from bytes to codepoints we decode the stream and when we need to convert from codepoints to bytes we encode them.
+Any bytesstring be it file or network stream needs to be decoded into Unicode before playing with the data in your program and for this u need to know the encoding of the data that is coming in. And similarly when u want to send the data out to network or file or databse make sure  u encode the data into utf-8 before saving
+Decode as early as possible , Unicode everywhere in your program with 'u' and encode into Bytes as late as possible'''
+
+Fact of Life #1 : Computers are built on  only bytes , Files, Networks everything
+In python str: sequence of bytes (2.x default)
+unicode : sequence on code points (3.x default)
+unicode.encode --> bytes
+bytes.decode -->unicode
+
+Python implicitly converts str to unicode during operations lije below
+s="Hello" + u"World"
+s=u"Hello World" , it does so by "World".decode('ascii')
+The above implicit conversin causes issues most of the times.
+
+One-character Unicode strings can also be created with the unichr()
+built-in function, which takes integers and returns a Unicode string of length 1
+that contains the corresponding code point.  The reverse operation is the
+built-in ord() function that takes a one-character Unicode string and
+returns the code point value
+In [62]: unichr(1234)
+Out[62]: u'\u04d2'
+In [63]: ord(u'\u04d2')
+Out[63]: 1234
+*\x takes 2 hex digits , \u 4 and \U 8 
+
+*library python-ftfy fixes mojibake o garbage mis encoded text for u 
+*decode translates str to unicode instance, encode  does vice versa. str uses 8 bytes to represet a char where as for unicode it can differ from 8 to 32.
+**In general, all text data needs to be decoded from its byte representation as it is read, and encoded from the internal values to a specific representation as it is written. codecs module  provides classes that manage the data encoding and decoding for you,
+** codecs.open automatically manages this conversion.
+
+Only when a tty is associated with sys.stdout default encoding is set, if there is no terminal asociated its assumed that encoding will be set manually.
+So if not done then pipe's will fail with unicode exception when used as output.
+To overcome we have to assign getwriter to sys.stdout as shown below
+sys.stdout = codecs.get_writer(encoding)(sys.stdout)
+You can get the default locale by using below
+lang, encoding = locale.getdefaultlocale()
+Same needs to be done for sys.stdin when input is not coming from console or if it is coming from a pipe.
+
+codecs.EncodedFile() can be used to read and write to files if the data encoding is different and the file needs to be written in different encoding.
+encoded_file = codecs.EncodedFile(buffer, data_encoding=’utf-8’,
+file_encoding=’utf-16’)
+

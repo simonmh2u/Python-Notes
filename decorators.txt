@@ -1,0 +1,12 @@
+Decorators are basically wrappers on functions or classes which can help modify/add additional functionality to existing functions.
+
+All decorators are closures. Closures are inner/nested functions which close and retain the values passed from outer functions.
+
+import wrapt ; @wrapt.decorator can be used to created decorator and this way we dont need to worry about nested functions.
+
+functools.wraps decorator copies the function name and doc strings from the nested  function to the function sent in arguement.
+
+*A def statement within a function body defines a nested function, and the func-
+tion whose body includes the def is known as an outer function to the nested one.
+Code in a nested function’s body may access (but not rebind) local variables of an
+outer function, also known as free variables of the nested function

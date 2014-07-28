@@ -1,0 +1,34 @@
+Notes : 
+Incase of mutable objects like lists l+=1 is different than l=l+1 . In the latter case in place add is not performed as opposed to the first case.This will not hold good for immutable objects like string. THis is the same as m.__iadd__(5)
+In [95]: old_m = m = [1,2,3]
+In [96]: old_m,m, old_m is m , id(old_m), id(m)
+Out[96]: ([1, 2, 3], [1, 2, 3], True, 2141584620, 2141584620)
+In [98]: m = m+ [5]
+In [99]: old_m,m, old_m is m , id(old_m), id(m)
+Out[99]: ([1, 2, 3], [1, 2, 3, 5], False, 2141584620, 2139886540)
+In [100]: old_m = m = [1,2,3]
+In [101]: old_m,m, old_m is m , id(old_m), id(m)
+Out[101]: ([1, 2, 3], [1, 2, 3], True, 2141584940, 2141584940)
+In [102]: m+=[5]
+In [103]: old_m,m, old_m is m , id(old_m), id(m)
+Out[103]: ([1, 2, 3, 5], [1, 2, 3, 5], True, 2141584940, 2141584940)
+Function Calls arguments are always passed by reference.
+Decorator , defining in simple terms its a way of adding an extra functionality to be executed before and/or after to a method.
+In [113]: def square(n):
+   .....:     return n*n
+   .....:
+In [114]: square(2)
+Out[114]: 4
+In [115]: def stringify(func):
+   .....:     def con_str(n):
+   .....:         return str(func(n))
+   .....:     return con_str
+   .....:
+In [116]: ss = stringify(square)
+In [118]: ss(5)
+Out[118]: '25'
+In [119]: @stringify
+   .....: def cubes(n):
+   .....:     return n*n*n
+In [120]: cubes(3)
+Out[120]: '27'

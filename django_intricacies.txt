@@ -1,0 +1,8 @@
+Tango With Django
+Django commands : 
+*make project :   python django-admin.py startproject tango_with_django_project
+*Run server : python manage.py runserver --noreload
+
+*render or render_to_response to be used only when a template is used else just use HttpResponse object.
+*url mapping from project urls.;y to app specific urls.py is done using include function.
+

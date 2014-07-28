@@ -1,0 +1,148 @@
+Attributes can be bound to a class even outside
+class C2(object): pass
+C2.x = 2
+
+C2.__name__ is the name of the class
+__dict__ holds all atributes of the class
+__bases__ is a tuples holding all bases classes of the class
+
+class C4(object): #
+x = 23
+def amethod(self):
+print C4.x   # use fuly qualified name when referencing class variables in a method
+
+__varname is a private variable , python implicitly chanegs it to __classname__varname
+
+_varname is meant to be private variable to that scope, its just a convention.
+
+A descriptor is any new-style object whose class supplies a special method named
+_ _get_ _ . __get__ is used to refence or get the attribute within a class.
+If a descriptor’s class also supplies a special method named _ _set_ _, then the
+descriptor is known as an overriding descriptor
+__init__ is just used for initialisation , if it returns a vlaue then TypeError exception is raised
+
+Newly created instance gets 2 attributes __dict__ and __class__
+This is how a new class gets created 
+x = C._ _new_ _(C, 23)    #__new__ is called when x =C(23) is called
+if isinstance(x, C): type(x)._ _init_ _(x, 23) #initialisation but of 23 is done here.
+
+Implementing Singletons
+class Singleton(object):
+_singletons = {}
+def _ _new_ _(cls, *args, **kwds):
+if cls not in cls._singletons:
+cls._singletons[cls] = super(Singleton, cls)._ _new_ _(cls)
+return cls._singletons[cls]
+
+Attribute Reference : 
+class B(object):
+    a = 23
+    b = 45
+    def f(self): pass
+    def g(self):pass
+
+class C(B):
+  b = 67
+  c = 89
+  d = 123
+  def g(self):pass 
+  def h(self):pass
+
+x = C( )
+x.d = 77
+x.e = 88
+
+print x.e,x.d, x.c, x.b, x.a
+
+Getting an attribute from class: 
+1. First a search is done in the __dict__ of the class 
+2. If not found it is searched in the parent class as per MRO. If the value returned is a descriptor then to fetch the value__get__ is called.
+
+Getting an attribute from the instance:
+1. For class attributes if the value returned is a OVERRIDING descriptor then the __get__ method is called.
+2. If no descriptors are involved then the check is done on __dict__ of the instance variable and value fetched.
+3. If not found then the search progresses to the instance.__class__ part of attribute fetching mentioned above .
+x.e and x.d above get resolve in Step 2 
+x.c and x.b get progress fully thorough 3 steps and get resolved in Step 1 of class resolution
+x.a gets resolved in Step 2 of class resolution.
+
+*The key difference between unbound and
+bound methods is that an unbound method is not associated with a particular
+instance while a bound method is.
+
+*An unbound method has three attributes in addition to those of the
+function object it wraps: im_class is the class object supplying the method,
+im_func is the wrapped function, and im_self is always None.
+
+In bound everything isa same except for im_self holds the object instance.
+
+Only class attributed are present in C.__dict__ and attributes initialised in __init__ are present in c.__dict (instance)
+*All classes have an attribute__mro__ which defines the method resolution order . To find any attribute python goes from left to right with depth last fashion.
+
+Example :
+ In [95]: class A(object):
+   ....:     def m1(self):
+   ....:         pass
+In [96]: class B(A):
+   ....:     pass
+In [97]: class C(A):
+   ....:     def m1(self):
+   ....:         print 'sub'
+In [101]: class D(B,C):
+   .....:     pass
+In [102]: D.__mro__
+Out[102]: (__main__.D, __main__.B, __main__.C, __main__.A, object)
+In [103]: a = D()
+In [104]: a.m1()
+sub
+
+*Delegating to a superclass implementation is the most frequent use of unbound methods.
+*Delegation to base class when overriding methods including for __init__ should be done explicitly in sub class else functionality present in BAse class may go missing. This kind og behaviour happens by itself in Java like languages.
+*When delegating always use super(classname,self).methodname() which will resolve Method resolution issues like same method of a common super class getting called twice.
+*classmethod must have a reference to a class object as the first parameter (cls), whereas staticmethod can have no parameters at all.
+*staticmethods are just normal functions just bearing a logical relationship with the class
+*Since for staticmethods the Class or instance object doesnt get passed and not required it saves resources.
+classmethods can be used for Factory methods, that are used to create an instance for a class using for example some sort of pre-processing. 
+
+*This is how you implement an abstract method in python , All classes inherting from the below class should inherit the get_radius method else an exception will be thrown
+class Pizza(object):
+   def get_radius(self):
+        raise NotImplementedError
+OR
+import abc
+ class BasePizza(object):
+    __metaclass__  = abc.ABCMeta
+     @abc.abstractmethod
+    def get_radius(self):pass
+
+*Properties are here to replace getters /setters or accessors/mutators and to run a specific code when a attribute is accessed it can be used.
+Typical Use
+class A(object):
+...
+def getArea(self):
+return self.width * self.height
+area = property(getArea, doc='area of the rectangle')
+a = A()
+print a.area #this gets and prints the by executing getArea method.
+*Inheritance with property doesnt work tat well as the subclass even if overrides a method the property will still point to the superclass method.
+
+__slots__ is a replacement for __dict__ used to hold instance attributes , this is basically a tuple holdin the attributes. It makes sense to use this only when for every object alive its important to save few KB's of memory i.e when millions of objects of a class are alive at the same time.
+Ex: class Tect(object):
+              __slots__ = 'a','b'
+*__getattr__ only gets called for attributes that don’t 
+actually exist. If you set the attribute directly, referencing that 
+attribute will retrieve it without calling __getattr__. __getattribute__ is called all the times.
+
+Special Methods : 
+if __call__ is present in a class or method  ,this makes the Class callable.
+__del__ of an instance is called before garbage collection
+__delattr__ is used to unbind the attribute from an instance 
+*Any x such that hash(x) returns a result, rather than raising an
+exception, is known as a hashable object. __hash__ calls id and only hashable objects can be dictionary keys
+*Python uses __nonzero__ to evaluate True or False.
+*__repr__ is called only in case__str__ is missing to get the string representation of the object. __unicode__ is called first in case tats missing then __Str __ is called.
+If both are present then both should return same value.
+
+*Any object, even a class object, has a type. In Python, types and classes are also
+first-class objects. The type of a class object is also known as the class’s metaclass
+

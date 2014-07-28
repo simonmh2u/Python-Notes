@@ -1,0 +1,25 @@
+inspect.getargspec helps inspect the arguements for a particuar function.
+
+dis.dis(func) prints out the disassembly code 
+
+Bound methods are methods when accessed via objects, unbound is when they are accessed via Class.
+
+String are immutable and Lists are mutable , l+=[1] mutates the same list where as l=l+[10] creates a copy of  list object and appends new value.
+Decorators are wrappers/closures that take a func as arguement and return a function and can add functionalities to existing bunch of simi;ar functions.
+The dis and codeop can beused to decompile and check low level assembly type calls.
+The method.func_code.* useful in chekcing variables in local  namespace of  any particular method.
+The class statement is just a way to call a function, take the result, and put it into a namespace,type(name, bases, dict) is the function that gets called when a class statement is used to create a class.
+map returns the actual values returned by function.
+filter appends the list values for which the function returns true.
+reduce is just for summing the values of list.
+Closure is a function that wraps a function and data and closes over them in its scope and acts as a factory for generating functions.
+Monkey patching is a way of wrapping/closing existing functions to change the behaviour i.e adding code before and after the existing code of function.
+Decorators are closures which close the inner function and take as arguement a function . This function can be modified with the decorator.
+Iterator iterates and has already has content populated.
+Generator generates content on fly on calling .next method. Use it when working with lare sets of data and need a lot of memory or processing real time data.
+Metaprogramming is the code that writes code.getattr,setattr,hasattr .
+inspect.getargspec helps inspect the arguements for a particuar function.
+dis.dis(func) prints out the disassembly code 
+
+type(name,bases,dict) is the type function that gets called when we create a class using class statement.
+Eg: DoubleGame = type('DoubleGame',(object,),{'__init__': multiassign,'add':addme})

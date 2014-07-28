@@ -1,0 +1,138 @@
+AF_INET = IP4 , AF_INET6 = IP6
+SOCK_STREAM = TCP , SOCK_DGRAM = UDP
+Server calls = socket , bind , listen , accept, send
+Client calls = socket , connect , send , recv
+socket setsockopt (options like reuse address etc.), settimeout, setblocking are the main option settings.
+socket can exhibit file like behaviour by executing s.makefile() function- form experience resource management sux here and mysterious behaviour exhibited.                                
+Utility functions : socket.gethostname(), gethostbyname(), gethostbyaddr(), settimeout(5.0) - setting timout for client on server side to close conn if cliet does not send any data for x secs , setblocking(False) - this raises exception when the socket is blocked
+socket call options: , s.setsocketopts(SOL_SOCKET, SO_RESUSEADDR...)
+TCP = Connection oriented, UDP = singe datagram , UDS = using files
+socket.sendall() waits /blocks until all data is sent.
+Typical client code as below for low level socket operation.
+chunks = []
+while True:
+        chunk = s.recv(16384)
+        if not chunk: break
+        chunks.append(chunk)
+ s.close()
+response = "".join(chunks)
+
+For UDP s.recvfrom and c.sendto are the two imp methods .No connections just data packets flow.
+For Unix Domain sockets for bind and connect method it uses a file 
+For ex:s.bind('/tmp/fil.txt') and s.connect('/tmp/fil.txt')
+
+URLLIB:
+fields = { 'x':1,'y':2}
+parms = urllib.urlencode(fields) # URL encoded string fo parameters
+u = urllib.urlopen("http://somedomain.com/subscribe?"+parms) # this is for GET
+u = urllib.urlopen("http://somedomain.com/subscribe?"+parms) # this is for POST
+u.code , u.headers.items()  important methods
+urllib works for simple cases and does not support authentication and cookies and it supports only GET and POST
+urllib2 supports cookies and better error handling i,e it raises exceptions for http errors
+opener = urllib2.build_opener(urllib2.HTTPCookieprocessor) can be used to extend functionality of urllib2, few others that can be used are ProxyHandler, CacheFTPHandler,AuthHandler
+Bottomline: urllib is useful for file fetching or calling webservice with parameters only.
+For Finer control with urllib2 we need to use Request class of urllib2 , for ex if we need to add headers and custom data
+Ex:
+request = urllib2.Request('http://localhost:8080/')
+print 'Request method before data:', request.get_method()
+
+request.add_data(urllib.urlencode(query_args))
+print 'Request method after data :', request.get_method()
+request.add_header('User-agent', 'PyMOTW (http://www.doughellmann.com/PyMOTW/)')
+ u = opener.open(request)
+resp  = u.read()
+
+
+f = ftplib.FTP(host,user,pass)
+f.retrlines or f.storbinary are methods for operations
+
+h = httplib.HTTPConnection("host:port")
+h.request("GET|HEAD|POST" ,"index.html")
+d = h.getresponse()
+data = d.read(), d.
+
+CacheControl header which has value in time seconds  in http response is used to determine by http client whether to hit the server or its cache for repetitive content.
+Last modified(Server) Checking header and If-Modified-Since(client) header used to reduce load on servers. If content is modified then HTTP 200 is returned else HTTP 304 is returned.
+ETag(Server) and If-None-Match(client) same functionality  as above.
+Accept-Encoding and Content-Encoding used to agree compression and the type of algorithm between client and server 
+httplib2 better than httplib and urllib as it supports cache, etag,last modified and compression.
+Syntax:
+import httplib2
+h = httplib2.Http('cache')  #u can use  disable_ssl_certificate_validation=True if needed
+resp, content =h.request('url= http://google.com', header={'x':y},ca_certs='/')
+resp = response headers , cont = full content
+
+import requests
+r = requests.get(url,data,headers,files) 
+requests.get('https://github.com', verify=True) # for enabling https
+
+Imp difference : SOAP uses xml on http to formulate request and call individual methods associated with the webservice.
+REST just calls URL with arguments
+
+lxml,beautifulsoup are libraries used for parsing xml and html
+
+doc = json.load(f) - loads a file into dict and json.dump(doc, f) stores the dict into a file
+
+from string import Template -- this template can be used to replace keys with values in files or stream
+d = {'six':6}
+Template(open('sim.txt').read()).substitute(d).strip()
+
+Customised HTTP Server: 
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+Inherit from BaseHTTPRequestHandler  and override the do_GET,do_POST methods etc.
+class MyHandler(BAseHTTPRequestHandler):
+    def do_GET(self):
+             self.send_response()
+             self.send_header()
+             self.end_header()
+            self.wfile.write(f.read())  #sends content takes file contents
+serv = HTTPServer(('',8080),MyHandler)
+serv.serv_forever()
+
+TCPServer -- same concept as above , it needs a requesthandler class and a SockerServer type
+
+from SocketServer import BaseRequestHandler
+import datetime
+import SocketServer
+
+class Handler1(BaseRequestHandler):
+    def handle(self):
+        self.request.sendall(str(datetime.datetime.now())+'\n')
+        
+tcph = SocketServer.TCPServer(("",9099),Handler1)
+tcph.serve_forever()
+
+Read the SockServer code comments for excellent explanation on simultaneous multiple clients
+To make the above code accessible to multiple clients simultaneously use a Thread or Fork mixins.
+
+Eg: class MyServer(ThreadMixin,TCPServer) : call the TCP __init__
+Eg: class MyServer(ForkingMixin,HTTPServer) : call the TCP __init__
+OR
+Eg :class MyServer(SocketServer.ForkingTCPServer):call Forking __init__
+
+http://kmkeen.com/socketserver/
+
+**XML RPC
+#Server Code 
+from SimpleXMLRPCServer import SimpleXMLRPCServer
+def add(x,y):
+return x+y
+s = SimpleXMLRPCServer(("",8080))
+s.register_function(add)
+s.serve_forever()
+#Client Code
+import xmlrpclib
+s = xmlrpclib.ServerProxy("http://localhost:8080")
+s.add(3,5)
+
+*XML-RPC assumes all strings are UTF-8 encoded Unicode
+* Dont use xml-rpc when large volumes of data needs to be transferred to and fro.
+
+*pickle used for serialisation , dump used to dump the contents of object into a file,socket etc and load used to read it back and convert into python object.
+ex: import pickle
+l = range(10) ; f = open('ss.txt','a') ; pickle.dump(l,f) # this saves contents of l  in file ss.txt
+l = pickle.load(f) # this loads content of f in l python object
+|||ly loads and dumps are used to pickle and unpickle contents of objects into strings.
+*pickle has security concerns anybody can send arbitrary commands to python server interpretor if they come to understand that the server is receiving pickled objects
+
+
