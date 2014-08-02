@@ -1,5 +1,6 @@
 *struct
-v=5 ; import struct ; s = struct.Struct('I 2s f') #Argument should be format specifier
+The struct module includes functions for converting between strings of bytes and native Python data types such asnumbers and strings.
+v=5 ; import struct ; s = struct.Struct('I') #Argument should be format specifier
 v2=s.pack(v) # converts into binary
 s.unpack(v2) # converts into relevant data type
 
@@ -103,3 +104,36 @@ codecs.EncodedFile() can be used to read and write to files if the data encoding
 encoded_file = codecs.EncodedFile(buffer, data_encoding=’utf-8’,
 file_encoding=’utf-16’)
 
+# Set standard output encoding to UTF-8.
+sys.stdout = codecs.getwriter(’UTF-8’)(sys.stdout) #needed when printing text outside asci
+
+*difflib module used to compare sequences and find differences , output more or less similar to Unix diff command.
+import difflib ; d = difflib.ndiff(text1,text2)
+
+*import string ; string.ascii , string.digits etc have a lot of constants which can be used instead of manually declaring.
+string.capwords capitalises all words in a sentence.
+string.translate can be used for translations 
+import string;leet = string.maketrans(’abegiloprstz’, ’463611092572’) s = ’The quick brown fox jumped over the lazy dog.’
+print s.translate(leet)
+string.Template can be used to for text substituin in static files like xml , u can inherit this class even and specify your own delimiter etc.
+t = string.Template("template cntent $var")
+d = {'var':'value'}
+t.safe_substitute(d) #This will replace var with value in template.
+
+*StringIO and cStringIO – Work with text buffers using file-like API
+This module implements an in-memory file object. This object can be used as input or output to most functions that expect a standard file object.
+The StringIO class implements memory file versions of all methods available for built-in file objects, plus a getvalue method that returns the internal string value
+
+
+*Regular Expressions
+m = re.search(pattern,string) -- This returns the match object with m.string having string and m.re.pattern havgin matched pattern .
+pattern mentioned above can be compiled as well before hand which reduces runtime overhead
+ex: regex = re.compile(pattern ; m = regex.search(string))
+By pre-compiling any expressions your module uses when the module is loaded you shift the compilation work to application startup time, instead of a point where the program is responding to a user action.
+re.findall(pattern,string) finds all patterns and returns a string of pattern matched , finditerreturns match object smilarly
+non greedy match means the matching stops as soon as the match is found , it does not go on to scan the whole string .
+match.groups, match.group can be used to fetch specific groups that have matched
+compile function has options like re.IGNORECASE, re.MULTILINE ,re.UNICODE
+Regular expression testing tool mentioned on page 89 -- Very useful
+
+*textwrap.fill and textwrap.dedent used for wrapping and unindenting 
