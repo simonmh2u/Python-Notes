@@ -59,7 +59,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tango_with_django_project.setti
 
 Page.objects.all() #Returns all rows
 Page.objects.filter(id=1) #Returns filtered rows using any field
-
+Page.objects.get returns just one object - both of the above returns lists
+	
 Admin page for specific models can be changed by creating related modesl in admin.py file for ex:
 
 class PageAdmin(admin.ModelAdmin):
@@ -69,3 +70,10 @@ class PageAdmin(admin.ModelAdmin):
 
 admin.site.register(Page, PageAdmin)
 https://docs.djangoproject.com/en/1.5/intro/tutorial02/ -- more data 
+
+The Django template conditional tag - {% if %} - is a really neat way of determining the existence of an object within the template’s context. Try getting into the habit of performing these checks to reduce the scope for potential exceptions that could be raised within your code.
+
+django.conf.urls package has the   patterns, url methods
+Finally, a performance note: these regular expressions are compiled the first time the URLconf module is loaded.
+
+Each view is responsible for doing one of two things: returning an HttpResponse object containing the content for the requested page, or raising an exception such as Http404. The rest is up to you.
