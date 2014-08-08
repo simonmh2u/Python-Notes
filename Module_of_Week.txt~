@@ -1,26 +1,3 @@
-create table project (
-name
-text primary key,
-description text,
-deadline
-date
-);
--- Tasks are steps that can be taken to complete a project
-create table task (
-id
-integer primary key autoincrement not null,
-priority
-integer default 1,
-details
-text,
-status
-text,
-deadline
-date,
-completed_on date,
-project
-text not null references project(name)
-);
 *struct
 The struct module includes functions for converting between strings of bytes and native Python data types such asnumbers and strings.
 v=5 ; import struct ; s = struct.Struct('I') #Argument should be format specifier
@@ -229,7 +206,3 @@ with sqlite3.connect('sqllte.db') as conn;
     conn.executescript(script_content_read_into_file)
     conn.execute(insert into project (name, description, deadline)
     values (’pymotw’, ’Python Module of the Week’, ’2010-11-01’))
-2.)Querying is a two step process. First, run the query with the cursor’s execute() method to tell the database engine
-what data to collect. Then, use fetchall() to retrieve the results. The return value is a sequence of tuples containing
-the values for the columns included in the select clause of the query
-
