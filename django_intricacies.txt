@@ -69,3 +69,30 @@ class PageAdmin(admin.ModelAdmin):
 
 admin.site.register(Page, PageAdmin)
 https://docs.djangoproject.com/en/1.5/intro/tutorial02/ -- more data 
+
+*6.1. Basic Workflow: Data Driven Pages
+There are five main steps that you must undertake to create a data driven webpage in Django.
+
+First, import the models you wish to use into your application’s views.py file.
+Within the view you wish to use, query the model to get the data you want to present.
+Pass the results from your model into the template’s context.
+Setup your template to present the data to the user in whatever way you wish.
+If you have not done so already, map a URL to your view.
+
+
+*Name ur urls so that u dont have to hardcode ur urls in templates.
+
+*Common code snippet to raise exceptions
+def detail(request, poll_id):
+    try:
+        poll = Poll.objects.get(pk=poll_id)
+    except Poll.DoesNotExist:
+        raise Http404
+    return render(request, 'polls/detail.html', {'poll': poll})
+	
+Shortcut method for the above
+from django.shortcuts import render, get_object_or_404
+poll = get_object_or_404(Poll, pk=poll_id)
+
+
+* you can create a 404.html template in the root of your template directory. The default 404 view will then use that template for all 404 errors when DEBUG is set to False - same thing works for 500.html as well
