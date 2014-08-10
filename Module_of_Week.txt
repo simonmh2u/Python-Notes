@@ -1,3 +1,4 @@
+
 *struct
 The struct module includes functions for converting between strings of bytes and native Python data types such asnumbers and strings.
 v=5 ; import struct ; s = struct.Struct('I') #Argument should be format specifier
@@ -5,13 +6,45 @@ v2=s.pack(v) # converts into binary
 s.unpack(v2) # converts into relevant data type
 
 *shelve
-used to internally pickle objects in key value pair . import shelve
+The shelve module can be used as a simple persistent storage option for Python objects when a relational database
+is overkillused to internally pickle objects in key value pair .
+import shelve
 s = shelve.open('test.db')
 s['k1'] = range(10)
 s.close()
+Shelves do not track modifications to volatile objects, by default.To automatically catch changes to volatile objects stored in the shelf, open the shelf with writeback enabled. The
+writeback flag causes the shelf to remember all of the objects retrieved from the database using an in-memory cache.
+Each cache object is also written back to the database when the shelf is closed.
 
-*For large amounts of data, it may be more efficient to use an array instead of a list, ex: import array ; a = array.array('i',range(10)) #i is code representing integer
+*pickle/cPickle
+pickle module implements an algorithm for turning an arbitrary Python object into a series of bytes. This
+process is also called serializing” the object.Once the data is serialized, you can write it to a file, socket, pipe, etc.
+In [3]: d
+Out[3]: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+In [5]: p = pickle.dumps(d)
+In [6]: p
+Out[6]: '(lp0\nI0\naI1\naI2\naI3\naI4\naI5\naI6\naI7\naI8\naI9\na.'
+n [7]: f = pickle.loads(p)
+In [8]: f
+Out[8]: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+OR
+
+f = open('tmp.file','wb+')
+pickle.sump(d,f)
+f.close()
+
+When working with your own classes, you must ensure that the class being pickled appears in the namespace of the
+process reading the pickle. Only the data for the instance is pickled, not the class definition. The class name is used to
+find the constructor to create the new object when unpickling
+
+
+
+
+*For large amounts of data, it may be more efficient(coz stored contiguous blocks of memory) to use an array instead of a list, ex: import array ; a = array.array('i',range(10)) #i is code representing integer
 Only difference between list and array is array hols only same data type
+a.tofile(output.file)    # to read and write directly from array 
+a.fromfile(output.file)
+
 
 *heapq and bisect are used to generate lists in sorted order when the list is changing continuously
 In [88]: for i in range(1,20):
@@ -109,6 +142,10 @@ sys.stdout = codecs.getwriter(’UTF-8’)(sys.stdout) #needed when printing tex
 
 *difflib module used to compare sequences and find differences , output more or less similar to Unix diff command.
 import difflib ; d = difflib.ndiff(text1,text2)
+get close match works like spell checker google search
+In [114]: difflib.get_close_matches('prit',keyword.kwlist)
+Out[114]: ['print']
+
 
 *import string ; string.ascii , string.digits etc have a lot of constants which can be used instead of manually declaring.
 string.capwords capitalises all words in a sentence.
@@ -137,3 +174,66 @@ compile function has options like re.IGNORECASE, re.MULTILINE ,re.UNICODE
 Regular expression testing tool mentioned on page 89 -- Very useful
 
 *textwrap.fill and textwrap.dedent used for wrapping and unindenting 
+
+*datetime:
+import time ; time.ctime => onvert a time in seconds since the Epoch to a string in local time
+In [116]: time.time()
+Out[116]: 1407483165.089312
+In [117]: time.ctime(time.time())
+Out[117]: 'Fri Aug  8 13:02:51 2014'
+
+print datetime.datetime.now().ctime() #Gives current time and converts into ctime
+Setting date : datetime.date(2008, 3, 12)
+Setting time : datetime.time(1, 3, 12)
+You can use datetime to perform basic arithmetic on date values via the timedelta clas
+today = datetime.date.today()
+one_day = datetime.timedelta(days=1)
+yesterday = today - one_day
+print ’Yesterday:’, yesterday
+Normal comparison operators >,< can be used to comparre date and time objects
+datetime.datetime.now().time() or .day or .date or .second etc gives current values
+You can even change the format in whic daatimetime is reported 
+format = "%a %b %d %H:%M:%S %Y"
+today = datetime.datetime.today()
+print ’strptime:’, today.strftime(format)
+
+*dateutil is an excellent 3rd party module which extends datetime and provides easy to use relateiv api's
+
+*DBM style databases are databses with key value pair sorga only.
+
+*SQLITE3
+1.) Create a db file using connect function if it doestn exist
+with sqlite3.connect('sqllte.db') as conn;
+    conn.executescript(script_content_read_into_file)
+    conn.execute(insert into project (name, description, deadline)
+    values (’pymotw’, ’Python Module of the Week’, ’2010-11-01’))
+2.)Querying is a two step process. First, run the query with the cursor’s execute() method to tell the database engine
+what data to collect. Then, use fetchall() to retrieve the results. The return value is a sequence of tuples containing
+the values for the columns included in the select clause of the query
+cur  = conn.cursor() ; cur.execute('select * from task') ; for r in cur.fetchall():print r - THis will return tuples with data values
+To get column info - > for colinfo in cursor.description: print colinfo
+
+Connection objects have a row_factory property that allows the calling code to control the type of object created to represent each row in the query result set.  Row instances can be accessed by column index and name, example below:
+cur = conn.cursor(); cur.row_factory= sqlite.Row ; 
+cur.execute('select * from task'); for r in cur.fetchall(): print r['id'], r['name'] # u see the references are being made by column names
+
+Use variables to prevent SQL injection attacks : ecample for named variables/
+query = "select * from task where id = :id"
+cur.execute(query,{'id':123}) or u can use a variable as well for 123 which is declared in advance.
+Query parameters can be used with select, insert, and update statements. They can appear in any part of the query where a literal value is legal.
+To apply the same SQL instruction to a lot of data use executemany(). This is useful for loading data, since it avoids looping over the inputs in Python and lets the underlying library apply loop optimizations.Example below:
+SQL = "insert into task (details, priority, status, deadline, project) values (:details, :priority, 'active', :deadline, :project)"
+d = csv.DictReader(open('sam.csv'))
+cur.executemany(SQl,d)
+d looks somehitng like below:
+In [38]: for i in d:
+    print i
+{'project': 'pymotw', 'priority': '2', 'deadline': '2010-10-02', 'details': 'finish reviewing markup'}
+{'project': 'pymotw', 'priority': '2', 'deadline': '2010-10-03', 'details': 'revise chapter intros'}
+{'project': 'pymotw', 'priority': '1', 'deadline': '2010-10-03', 'details': 'subtitle'}
+
+*Conversion for types beyond those supported by default is enabled in the database connection using the detect_types flag. Use PARSE_DECLTYPES is the column was declared using the desired type when the table was defined.
+with sqlite3.connect(db_filename, detect_types=sqlite3.PARSE_DECLTYPES) as conn:
+To open an in-memory database, use the string ’:memory:’ instead of a filename when creating the Connection.
+with sqlite3.connect(’:memory:’) as conn:
+
