@@ -237,3 +237,174 @@ with sqlite3.connect(db_filename, detect_types=sqlite3.PARSE_DECLTYPES) as conn:
 To open an in-memory database, use the string ’:memory:’ instead of a filename when creating the Connection.
 with sqlite3.connect(’:memory:’) as conn: 
 
+
+**TO BE CONTINUED **
+
+
+Threading : 
+Basic structure for threading.
+def worker(val):pass 
+for i in range(5):
+t=threading.Thread(name="Anython", target=worker,args=(val,)) 
+t.start() #Starts 5 threads
+The logging module supports embedding the thread name in every log message using the formatter code %(threadName)s
+
+logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] (%(threadName)-10s) %(message)s',)
+logging is also thread-safe, so messages from different threads are kept distinct in the output.
+
+*Up to this point, the example programs have implicitly waited to exit until all threads have completed their work.
+Sometimes programs spawn a thread as a daemon that runs without blocking the main program from exiting.
+Waiting for the daemon thread to exit using join() means it has a chance to produce its "Exiting" mess
+If you for example want to concurrently download a bunch of pages to concatenate them into a single large page you may start concurrently downloads using threads, but need to wait until the last page/thread is finished before you start assembling a single page out of many. That's when you use join()
+Basically main thread or the thread from where u make join call  waits until the thread that join is called upon completes execution.
+threading.enumerate holds list of active threads , this can be looped into and joined , care should be taken to skip current thread
+
+Basic Structre #2 for Threads -- this is how we define custom threads
+class MyThread(threading.Thread):
+def run(self):	#Overrding run method and putting in business in runmethod
+	logging.debug(’running’)
+	return
+
+for i in range(5):
+t = MyThread()
+t.start()
+
+
+Because the args and kwargs values passed to the Thread constructor are saved in private variables, they are not
+easily accessed from a subclass. To pass arguments to a custom thread type, redefine the constructor to save the values
+in an instance attribute that can be seen in the subclass
+
+class MyThreadWithArgs(threading.Thread):
+def __init__(self, group=None, target=None, name=None,args=(), kwargs=None, verbose=None):
+	threading.Thread.__init__(self, group=group, target=target, name=name,verbose=verbose)
+	self.args = args
+	self.kwargs = kwargs
+	return
+def run(self);pass
+
+* simple way to communicate between threads is using threading.Event objects. An Event manages an internal flag that callers can either set() or clear().
+Other threads can wait() for the flag to be set(), effectively blocking progress until allowed to continue (Pg. 451)
+
+*t = threading.Lock() can be used to synchronize between threads and work on common resources.
+t.acquire() and t.release() are the associated methods.
+Normal Lock objects cannot be acquired more than once, even by the same thread so its better to use threading.RLock()# i,e reentrant locks
+Context managers can be used for acquiring and releasing locks , snippet below:
+def worker_with(lock):
+	with lock:
+		logging.debug(’Lock acquired via with’)
+*In addition to using Events, another way of synchronizing threads is through using a Condition object. Because
+the Condition uses a Lock, it can be tied to a shared resource
+def consumer(cond):
+	logging.debug(’Starting consumer thread’)
+	t = threading.currentThread()
+	with cond:
+		cond.wait()
+		logging.debug(’Resource is available to consumer’)
+
+def producer(cond):
+	logging.debug(’Starting producer thread’)
+	with cond:
+		logging.debug(’Making resource available’)
+		cond.notifyAll()
+
+condition = threading.Condition()
+c1 = threading.Thread(name=’c1’, target=consumer, args=(condition,))
+c2 = threading.Thread(name=’c2’, target=consumer, args=(condition,))
+p = threading.Thread(name=’p’, target=producer, args=(condition,))
+
+use threading.Sepaphore(number of threads) when u want to give simultaneous accesss to a specific number of threads on a shared resource.
+
+*MULTIPROCESSING
+Below structere same as threading structure.
+import multiprocessing
+def worker():
+	"""worker function"""
+	print ’Worker’
+	return
+
+if __name__ == ’__main__’:
+jobs = []
+for i in range(5):
+p = multiprocessing.Process(target=worker)
+jobs.append(p)
+p.start()
+
+Unlike with threading, to pass arguments to a multiprocessing Process the argument must be able to be serialized
+using pickle which makes sense as data might flow between processes.
+One difference between the threading and multiprocessing examples is the extra protection for __main__
+used in the multiprocessing examples. Due to the way the new processes are started, the child process needs
+to be able to import the script containing the target function. Wrapping the main part of the application in a check
+for __main__ ensures that it is not run recursively in each child as the module is imported
+
+*name = multiprocessing.current_process().name -- to get the name of current process
+same usage of join as in threading.
+*p.terminate() kills the process 
+It is important to join() the process after terminating it in order to give the background machinery time to
+update the status of the object to reflect the termination.
+
+Below method can be used to set loggin for mutiprocessing lines of code
+multiprocessing.log_to_stderr()
+logger = multiprocessing.get_logger()
+logger.setLevel(logging.INFO)
+The other method of subclassing and creating processes can also be used.
+
+Using muiltple processes to pass data around using queues
+import multiprocessing
+class MyFancyClass(object):
+	def __init__(self, name):
+		self.name = name
+
+	def do_something(self):
+		proc_name = multiprocessing.current_process().name
+		print ’Doing something fancy in %s for %s!’ % (proc_name, self.name)
+
+def worker(q):
+	obj = q.get()
+	obj.do_something()
+
+
+if __name__ == ’__main__’:
+	queue = multiprocessing.Queue()
+	p = multiprocessing.Process(target=worker, args=(queue,))
+	p.start()
+	queue.put(MyFancyClass(’Fancy Dan’))
+	queue.close()
+	queue.join_thread()
+	p.join()
+
+
+***multiprocessing Lock , Semaphore and Event work the same way as they do in for threads ***
+
+Managiing Shared state
+import multiprocessing
+def worker(d, key, value):
+	d[key] = value
+
+if __name__ == ’__main__’:
+mgr = multiprocessing.Manager()
+d = mgr.dict()
+jobs = [ multiprocessing.Process(target=worker, args=(d, i, i*2)) for i in range(10)]
+for j in jobs:
+	j.start()
+for j in jobs:
+	j.join()
+
+print ’Results:’, d
+By creating the list through the manager, it is shared and updates are seen in all processes. Dictionaries are also
+supported.
+
+*The Pool class can be used to manage a fixed number of workers for simple cases where the work to be done can be
+broken up and distributed between workers independently
+
+Ex:
+def do_calculation():
+	blah blah
+
+pool_size = multiprocessing.cpu_count() * 2 
+pool = multiprocessing.Pool(processes=pool_size,initializer=start_process) # This asigns the Pool
+pool_outputs = pool.map(do_calculation, inputs) # This picks ans assigns task to processes
+pool.close() # no more tasks
+pool.join() # wrap up current tasks
+
+
+
