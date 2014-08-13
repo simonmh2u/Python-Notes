@@ -172,3 +172,63 @@ make use of a new class, HttpResponseRedirect. As the name may suggest to you, t
 from django.contrib.auth.decorators import login_required place this decorator above any view method and it will take care of
 restricting access. LOGIN_URL setting in settings.py can be used to redirect the user to login page.
 Awesome app for the above :  https://django-registration.readthedocs.org/en/latest/  and https://bitbucket.org/ubernostrum/django-registration/
+
+Index html can be made as below , user us passed in the request context so we can have this conditional display
+% if user.is_authenticated %}
+<a href="/rango/restricted/">Restricted Page</a><br />
+<a href="/rango/logout/">Logout</a><br />
+{% else %}
+<a href="/rango/register/">Register Here</a><br />
+<a href="/rango/login/">Login</a><br />
+{% endif %}
+
+
+**TEMPLATES**
+
+*You should always aim to extract as much reoccurring content for your base templates. While it may be a bit more of a challenge for you to do initially, the time you will save in maintenance of your templates in the future far outweighs the initial overhead. Think about it: would you rather maintain one copy of your markup or multiple copies?
+A block is defined as below in django template language.
+  {% block body_block %} This is body_block's default content. 	{% endblock %}
+
+You use {% extends 'rango/base.html' %} to extend a particular template. You can override any blck in you sub template ,
+if not overridden then the block from base template is displayed.
+
+Variables look like this: {{ variable }}. When the template engine encounters a variable, it evaluates that variable and replaces it with the result
+If you use a variable that doesn’t exist, the template system will insert the value of the TEMPLATE_STRING_IF_INVALID setting, which is set to '' (the empty string) by default.
+
+Filters look like this: {{ name|lower }}. This displays the value of the {{ name }} variable after being filtered through the lower filter,
+Commonly used filters : {{ value|striptags }},{{ value|length }},{{ value|default:"nothing" }}
+Tags look like this: {% tag %}. Tags are more complex than variables: Some create text in the output, some control flow by performing loops or logic, and some load external information into the template to be used by later variables.
+Example: 
+{% if athlete_list|length > 1 %}
+   Team: {% for athlete in athlete_list %} ... {% endfor %}
+{% else %}
+   Athlete: {{ athlete_list.0.name }}
+{% endif %}
+
+Go thru below link of tags
+https://docs.djangoproject.com/en/1.5/ref/templates/builtins/#ref-templates-builtins-tags
+
+Comment in template cdode : {# {% if foo %}bar{% else %} #}
+
+You can use as many levels of inheritance as needed. One common way of using inheritance is the following three-level approach:
+
+    Create a base.html template that holds the main look-and-feel of your site.
+    Create a base_SECTIONNAME.html template for each “section” of your site. For example, base_news.html, base_sports.html. These templates all extend base.html and include section-specific styles/design.
+    Create individual templates for each type of page, such as a news article or blog entry. These templates extend the appropriate section template.
+*If you find yourself duplicating content in a number of templates, it probably means you should move that content to a {% block %} in a parent template.
+*If you need to get the content of the block from the parent template, the {{ block.super }} variable will do the trick
+*Automatic HTML escaping is turned on by default in django templating system and protects us from Cross site scripting (XSS) attack
+It can be turned off by 
+{% autoescape off %}
+    Hello {{ name }}
+{% endautoescape %}
+
+*Accessing method calls
+
+Most method calls attached to objects are also available from within templates. This means that templates have access to much more than just class attributes (like field names) and variables passed in from views. 
+Ex:
+{% for comment in task.comment_set.all %}
+    {{ comment }}
+{% endfor %}
+
+You cant pass arguements but to methods
