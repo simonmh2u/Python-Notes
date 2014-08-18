@@ -71,8 +71,6 @@ In [6]: p1 = p('simon',30)
 *os.path can be used to split dir and file names file extensions expand env variables, normalise paths, get create modifytime 
 os.stat give stats like permission etc abt the file
 
-*The fileinput module is a framework for creating command line programs for processing text files in a filter-ish manner, no need to worry at opening file reading line by line and related error handling. Pg.268 , fileinput.input()
-
 *linecache can be used to extract specific lines from files , it even uses its own cache for efficient retirieval of content . linecache.getline('sim.txt', 5)
 
 *The tempfile module provides several functions for creating filesystem resources  ecurely. TemporaryFile() opens and returns an un-named file,  NamedTemporaryFile()  , t1 = tempfile.NamedTemporaryFile()
@@ -406,5 +404,64 @@ pool_outputs = pool.map(do_calculation, inputs) # This picks ans assigns task to
 pool.close() # no more tasks
 pool.join() # wrap up current tasks
 
+
+*** Map Reduce to be Read **
+
+*FILE AND DIRECTORY ACCESS*
+
+os.path - os.path.basename('/tmp/sim.txt') returns the file or ex: in sim.txt
+os.path - os.path.dirname  returns the dir retrns /tmp
+os.path.splitext() works on '.' as separator
+os.path.split works on '/' as separator
+os.path.join(*parts) -- will build paths from tuples where parts = ('/tmp','sim.txt')
+os.path.expandvars() -- expands shell variables present in path
+*Paths assembled from separate strings using join() or with embedded variables might end up with extra separators or relative path components. Use normpath() to clean them up
+os.path.abspath converts relative path to abspath
+
+Self explanatory methods of os.path
+os.path.isabs(file)
+print ’Is File?  os.path.isfile(file)
+print ’Is Dir?  os.path.isdir(file)
+print ’Is Link?  os.path.islink(file)
+print ’Mountpoint?  os.path.ismount(file)
+print ’Exists? os.path.exists(file)
+print ’Link Exists?  os.path.lexists(file)
+
+time.ctime(os.path.getatime(__file__))   #Access time
+time.ctime(os.path.getmtime(__file__))   #Modified time
+time.ctime(os.path.getctime(__file__))   #Changed time
+
+
+os.path.walk() traverses all of the directories in a tree and calls a function you provide passing the directory
+name and the names of the contents of that directory
+Ex:
+os.path.walk(’example’, visit, ’(User data)’)
+
+def visit(arg, dirname, names): 
+	pass
+	
+#Here example is the root directory passed , visit is the the  method to be called upon encountering each dir with arg as 'User data'.
+When visit is called arg holds 'User data', dirname holds root dir here is example and names holds a tuples with listing of example dir.
+
+*The fileinput module is a framework for creating command line programs for processing text files in a filter-ish manner,
+ no need to worry at opening file reading line by line and related error handling. Pg.268 , fileinput.input().
+ It takes care of all above. For ex :
+ for line in fileinput.input('sim.txt'):
+	print lin
+
+fileinput.filelineno() gives the curent line number
+Use inplace=True for input method when u want to open files and make inline edins in the file. A tmp.bak file is created while edit 
+is in progress .
+
+
+*tempfile.TemporaryFile() creates a temporarily file with efault premissio w+b , this is unnamed my default.
+temp = tempfile.NamedTemporatyFile() creates named temp file , temp.name gives the name
+tempfile.mkdtemp() -- creates temp directory
+									
+By resetting tempfile.tempdir variable you can change temp dir settings where the file gets created.
+
+*GLOB*
+Even though the glob API is very simple, the module packs a lot of power. It is useful in any situation where your
+program needs to look for a list of files on the filesystem with names matching a pattern.
 
 
