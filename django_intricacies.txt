@@ -232,3 +232,13 @@ Ex:
 {% endfor %}
 
 You cant pass arguements but to methods
+
+
+*COOKIES and SESSIONS**
+The most commonly used way of holding state is through the use of a session ID stored as a cookie on a client’s computer.
+A session ID can be considered as a token (a sequence of characters) to identify a unique session within a particular
+web application. Instead of storing all kinds of information as cookies on the client (such as usernames, names, passwords...),
+only the session ID is stored, which can then be mapped to a data structure on the web server. Within that data structure,
+you can store all of the information you require.
+
+django.contrib.sessions.middleware.SessionMiddleware takes care of creating sessions for django
