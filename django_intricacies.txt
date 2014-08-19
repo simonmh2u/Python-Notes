@@ -273,6 +273,6 @@ Sample Code ;
         
 *TWITTER BOOTSTRAP **
 
-The reason to add jquery and bootstrap.js files at the end in body is lso that the page can load up faster. The browser concentrates on rendering the elements of the webpage, and once this has been completed, the JavaScript files are loaded.
+The reason to add jquery and bootstrap.js files at the end in body is llso that the page can load up faster. The browser concentrates on rendering the elements of the webpage, and once this has been completed, the JavaScript files are loaded.
 
     
