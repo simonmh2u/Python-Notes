@@ -68,10 +68,6 @@ In [5]: p = collections.namedtuple('p','name age')
 In [6]: p1 = p('simon',30)
 
 
-*os.path can be used to split dir and file names file extensions expand env variables, normalise paths, get create modifytime 
-os.stat give stats like permission etc abt the file
-
-*linecache can be used to extract specific lines from files , it even uses its own cache for efficient retirieval of content . linecache.getline('sim.txt', 5)
 
 *The tempfile module provides several functions for creating filesystem resources  ecurely. TemporaryFile() opens and returns an un-named file,  NamedTemporaryFile()  , t1 = tempfile.NamedTemporaryFile()
 
@@ -80,7 +76,9 @@ move to move file
 copystat copies all stats from f1 to f2 , copymode copies permission.
 copytree , rmtree - recursive directory operations
 
-*dircache provided listdir method to list the contents of directory , it also caches the entries for next time use. if the timstamp in dir changes only then it updates the cache.
+*dircache provided listdir method to list the contents of directory , it also caches the entries for next time use. .
+if the timstamp in dir changes only then it updates the cache. We can manually reset cache by using dircache.reset()
+
 
 ***Pg.11 - Types of Exceptions  and Warning *** Must Read ***
 
@@ -196,6 +194,27 @@ today = datetime.datetime.today()
 print ’strptime:’, today.strftime(format)
 
 *dateutil is an excellent 3rd party module which extends datetime and provides easy to use relateiv api's
+
+*time
+time.time gives epoch time -- we need time.ctime to convert it into normal time
+The time module defines struct_time for holding date ,and time values with components broken out so they are easy to access.
+time.localtime() gives localtime broken down
+time.gmtime() gives utc time,
+time.mktime converts the above locatime (struct_time) into epoch time.
+
+now = time.ctime()  # this is str
+parsed = time.strptime(now) # converts it into struct_time
+print parsed
+print time.strftime("%a %b %d %H:%M:%S %Y", parsed) -- converts the struct_time to formatted string
+
+
+time.tzname gives the current time zone.
+time.tzset sets the current timezone after u set the TZ environment variable
+
+
+
+
+
 
 *DBM style databases are databses with key value pair sorga only.
 
@@ -409,6 +428,9 @@ pool.join() # wrap up current tasks
 
 *FILE AND DIRECTORY ACCESS*
 
+*os.path can be used to split dir and file names file extensions expand env variables, normalise paths, get create modifytime 
+os.stat give stats like permission etc abt the file
+The os module provides a wrapper for platform specific modules such as posix, nt, and mac.
 os.path - os.path.basename('/tmp/sim.txt') returns the file or ex: in sim.txt
 os.path - os.path.dirname  returns the dir retrns /tmp
 os.path.splitext() works on '.' as separator
@@ -443,6 +465,41 @@ def visit(arg, dirname, names):
 #Here example is the root directory passed , visit is the the  method to be called upon encountering each dir with arg as 'User data'.
 When visit is called arg holds 'User data', dirname holds root dir here is example and names holds a tuples with listing of example dir.
 
+os.getenv('PATH') can be used to get evinronment variables values
+
+os.getcwd() -- gets current working directry
+os.chdir() -- changes dir
+os.pardir() --returns ..
+
+The function access() can be used to test the access rights a process has for a file.
+eg:
+’Exists:’, os.access(__file__, os.F_OK)
+’Readable:’, os.access(__file__, os.R_OK)
+’Writable:’, os.access(__file__, os.W_OK)
+’Executable:’, os.access(__file__, os.X_OK)
+
+The above return true or false .
+
+stat_info = os.stat('/tmp/sim.txt') # os.stat helps retrieve valuable stats from file as below
+’\tSize:’, stat_info.st_size
+’\tPermissions:’, oct(stat_info.st_mode)
+’\tOwner:’, stat_info.st_uid
+’\tDevice:’, stat_info.st_dev
+’\tLast modified:’, time.ctime(stat_info.st_mtime)
+
+os.makedirs, os.rmdirs, os.listdir methods for directoy related operations.
+
+os.symlink , os.readlins, os.unlink creates reads and unlinks respectively
+
+The function os.walk() traverses a directory recursively and for each directory generates a tuple containing the directory
+path, any immediate sub-directories of that path, and the names of any files in that directory.
+
+Eg : for dir_name, sub_dirs, files in os.walk(root):
+print ’\n’, dir_name
+
+
+os.fork can be used to fork child processes.
+
 *The fileinput module is a framework for creating command line programs for processing text files in a filter-ish manner,
  no need to worry at opening file reading line by line and related error handling. Pg.268 , fileinput.input().
  It takes care of all above. For ex :
@@ -465,3 +522,41 @@ Even though the glob API is very simple, the module packs a lot of power. It is 
 program needs to look for a list of files on the filesystem with names matching a pattern.
 
 
+*fnmatch() compares a single filename against a pattern and returns a boolean indicating whether or not they match.
+pattern = ’FNMATCH_*.PY’
+fnmatch.fnmatchcase(name, pattern) returns true or false depending on match or not
+fnmatch.filter(name,pattern) returns the matched file names
+
+*linecache can be used to extract specific lines from files , it even uses its own cache for efficient retirieval of content .
+ linecache.getline('sim.txt', 5)
+
+
+*getopt , optparse and argparse are 3 apis for command line arguement parsing in the order of theier introduction in stdlib
+
+
+
+*SUBPROCESS*
+The subprocess module defines one class, Popen and a few wrapper functions that use that class.
+subprocess.call(['ls', ' -lrt'],shell=True) used as an alternative for running system commands os.system/
+Setting the shell argument to a true value causes subprocess to spawn an intermediate shell process, and tell it to
+run the command.The return value from call() is the exit code of the program.
+The return value from call() is the exit code of the program. The caller is responsible for interpreting it to detect
+errors. The check_call() function works like call() except that the exit code is checked, and if it indicates an
+error happened then a CalledProcessError exception is raised.
+outp = subprocess.check_output returns the output of the command executed which can be captured
+
+*subprocess.Popen
+the below sends data  to output via pipe
+proc = subprocess.Popen([’echo’, ’"to stdout"’],stdout=subprocess.PIPE,)
+stdout_value = proc.communicate()[0]
+
+The below receives data via pipe
+proc = subprocess.Popen([’cat’, ’-’],stdin=subprocess.PIPE,)
+proc.communicate(’\tstdin: to stdin\n’)
+
+proc = subprocess.Popen([’cat’, ’-’],stdin=subprocess.PIPE,stdout=subprocess.PIPE,)
+stdout_value = proc.communicate(’through stdin to stdout’)[0]
+
+
+proc = subprocess.Popen(’cat -; echo "to stderr" 1>&2’,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,)
+stdout_value, stderr_value = proc.communicate(’through stdin to stdout’)

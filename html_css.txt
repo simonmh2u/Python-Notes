@@ -1,0 +1,56 @@
+ids are unique for each page which means only one tag can have the same id and there can be any number of tags with same class name.
+id's are faster than class to load /render.
+.classname  is used in css to select a class
+#.idname is used to select an id.
+Use firebug edit mode to etst css code.
+
+Selectors:
+body h1 {
+    # this matches any h1 element inside any other element inside
+    # the body
+}
+body > h1 {
+    # only h1 that is the direct child of body will match
+}
+h1 + h2 {
+    # only h2 that comes immediately after h1 will match
+}
+ul li:first-child {
+    # only matches the first li item
+}
+* {
+    # matches any element
+}
+
+*.myclass {
+    # the better known .myclass is just shorthand
+}
+
+*#myid {
+    # the better known #myid is just shorthand
+}
+img[title]
+    select only img tags with "title" attribute
+
+input[type="text"]
+    input fields of type text
+
+a[href][title]
+    select a that has both href and title attrs
+
+*[title]
+    any element that has title attribute
+
+img[title~="Figure"]
+    any img with title that contains Figure in it
+        regexp match?
+
+img[title^="bar"]
+    any img with title that starts with "bar"
+
+img[title$="bar"]
+    any img with title that ends with "bar"
+
+img[title*="bar"]
+    any img with title that contains substring "bar"
+    
