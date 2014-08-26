@@ -276,3 +276,107 @@ Sample Code ;
 The reason to add jquery and bootstrap.js files at the end in body is llso that the page can load up faster. The browser concentrates on rendering the elements of the webpage, and once this has been completed, the JavaScript files are loaded.
 
     
+
+*python manage.py dumpdata article --indent=4 >article.json this command dumps the artilce table in jsn format.
+*python manage.py sqlclear article | python manage.py dbshell this command will clear the article table
+*python manage.py loaddata article.json will load data
+*Article.objects.filter(title__contains="simon") will return objects that match the title simon.
+
+Typical Ajax call looks like below : 
+
+$(function(){
+
+    $('#search').keyup(function() {
+    
+        $.ajax({
+            type: "POST",
+            url: "/articles/search/",
+            data: { 
+                'search_text' : $('#search').val(),
+                'csrfmiddlewaretoken' : $("input[name=csrfmiddlewaretoken]").val()
+            },
+            success: searchSuccess,
+            dataType: 'html'
+        });
+        
+    });
+
+});
+
+function searchSuccess(data, textStatus, jqXHR)
+{
+    $('#search-results').html(data);
+}
+
+Here the method search in views returns the the article objects mathcin the search_text.
+This is erndered in its own html file. the rendered ouput in html is displayed by searchSuccess method above.
+
+Webserveices with Tasty Pie.
+Tasty comes by default only for JSON , u need to install lxml and defusedxml to support xml .
+
+from tastypie.resources import ModelResource -- this will be used as base class to create web resource.
+class ArticleResource(ModelResource):
+    class Meta:
+        queryset = Article.objects.all()   # data of article object
+        resource_name = 'article'			# url resource name
+        filtering = { "title" : "contains" }
+        
+In urls.py create an instance of above resource
+art = ArticleResource()
+url(r'^api/', include(art.urls)) # the .urs comes from the base class i.e ModelResource.
+SyncDB to be done after this step for adding indexes etc on DB.
+Web Service can be accessed at /api/article/?format=json.
+resource_uri field aso gets generatd for the data which can be used to extract indivisual resources based on id
+filtering can be used for specific filtering on specific fields
+for example to extract the article field for which the title contais simon the below URL can be used
+/api/article/?format=json&title__contains=simon
+
+
+Data Migrations using south
+manage.py schemamigration article --initial #This will detect the models and create an initial snapshot
+manage.py schemamigration article --auto # Detech further changes if any like addition of new models etc and  and take snapshot.
+Each snapshot creates a python file with migration number like 0001 , 0002 etc. Each of this file has a forward and a backwod method,
+which defines the next step for ex forward for intiial migration would be create table command and for backword method the definition 
+would be drop table command.
+python manage.py migrate article will actually apply all the migration snapshots we created above.
+south_migrationhistiry table has all the history of migrations
+
+python migrate artile 0002 -- this will revert the schema back snapshot 0002.
+To delete any specific migrateion just delete the respective .py files tats all
+
+For example if u wanna convert a model which just has name and u wann use fname and lname now u need to add the new fields
+without removing the old field and create an --auto migration.
+
+Next create a data migration snapshot as below
+python manage.py datamigration artilce convert_names # this wil create a convert_names.py file with forward and backward methods.
+Where you need to write the data migration code.
+
+We then need to take out the name filed from models and create a schema migration upto this ipoint.
+
+General Notes :
+--auto looks at the previous migration, works out what’s changed, and creates a migration which applies the differences 
+- for example, if you add a field to a model, --auto will notice this, and make a migration which creates a new column for 
+that field on its model’s table.
+However, you’ll notice that --auto needs a previous migration - our new app doesn’t have one. Instead, 
+in this case, we need to use --initial, which will create tables and indexes for all of the models in the app;
+ it’s what you use first, much like syncdb, and --auto is then used afterwards for each change.
+ 
+*manage.py schemamigration southtut --auto --update # this can be used when u need to amedn the existing migration 
+which has already been applied.What south does is tat it reverts the migrations to prevous and then creates the new 
+snapshot with the changes .
+./manage.py migrate --list -- Lists all migrations
+
+  ./manage.py convert_to_south myapp -- used to convert existing app to souths
+
+*Full Text Search using Haystack and Whoosh
+
+necesssary configs:
+WHOOSH_INDEX = os.path.join(PROJECT_DIRECTORY,'whoosh/')
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': WHOOSH_INDEX,
+    },
+}
+
+http://django-haystack.readthedocs.org/en/v2.2.0/tutorial.html
