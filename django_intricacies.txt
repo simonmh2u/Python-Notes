@@ -380,3 +380,74 @@ HAYSTACK_CONNECTIONS = {
 }
 
 http://django-haystack.readthedocs.org/en/v2.2.0/tutorial.html
+
+Views : 
+def search_titles(request):
+    articles = SearchQuerySet().autocomplete(content_auto=request.POST.get('search_text', ''))  
+
+Main Class setup in search_indices.py
+class ArticleIndex(indexes.SearchIndex, indexes.Indexable):   #Bases that enable to search and index respectively.
+    text = indexes.CharField(document=True, use_template=True) #document is True is mandatory
+    pub_date = indexes.DateTimeField(model_attr='pub_date')    #mapping fiels to actual attributes in model article
+    content_auto = indexes.EdgeNgramField(model_attr='title')  #mapping fiels to actual attributes in model article
+    
+    def get_model(self):   #Overding this method and return the model
+        return Article
+
+    def index_queryset(self, using=None):
+        """Used when the entire index for model is updated."""
+        return self.get_model().objects.all()
+
+To build a SearchIndex, all that’s necessary is to subclass both indexes.
+SearchIndex & indexes.Indexable, define the fields you want to store data with and define a get_model method.
+
+
+***CLASS BASED VIEWS***
+At its core, a class-based view allows you to respond to different HTTP request methods with different class instance methods, instead of with conditionally branching code inside a single view function
+Allows us to use mixins hence reusability factor increased.
+from django.views.generic import View # command resting pace for generic views.
+Typical Generic View :
+class MyView(View):
+    def get(self, request):
+        # <view logic>
+        return HttpResponse('result')
+        
+Typical URL conf 
+url(r'^about/', MyView.as_view()),
+The as_view entry point creates an instance of your class and calls its dispatch() method. dispatch looks at the request to determine whether it is a GET,POSt etc.
+Note also that you can only inherit from one generic view - that is, only one parent class may inherit from View and the rest (if any) should be mixins. T
+
+Decorators can be applied within the url conf as below:
+(r'^about/', login_required(TemplateView.as_view(template_name="secret.html"))),
+A method on a class isn’t quite the same as a standalone function, so you can’t just apply a function decorator to the method – 
+you need to transform it into a method decorator first. 
+The method_decorator decorator transforms a function decorator into a method decorator so that 
+it can be used on an instance method. For example:
+ 
+ @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+ 
+Generic View example
+
+from django.views.generic import ListView
+from books.models import Book
+
+class AcmeBookList(ListView):
+
+    context_object_name = 'book_list'				#object name in template
+    queryset = Book.objects.filter(publisher__name='Acme Publishing') # criteria based on which objects are retuned in queyset
+    template_name = 'books/acme_list.html'	#template name
+    
+You can even use model = Book incase you wanted queryset to be Book.objects.all
+ListView has a get_queryset() method we can override. Previously, it has just been returning the value of 
+the queryset attribute, but now we can add more logic.
+urlpatterns = patterns('',
+    (r'^books/([\w-]+)/$', PublisherBookList.as_view()),
+)
+
+def get_queryset(self):
+        self.publisher = get_object_or_404(Publisher, name=self.args[0]) #Here args[0] is the arguement pass above in urlconf
+        return Book.objects.filter(publisher=self.publisher)
+
+
+*Processing Forms with Clas Based Views*
