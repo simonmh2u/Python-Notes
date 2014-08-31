@@ -133,10 +133,49 @@ s.headers.update({'x-test': 'true'})
 s.get('http://httpbin.org/headers', headers={'x-test2': 'true'})
 
 r.request.headers gives the headers sent in request to the server
+Prepared requests can be used if addionatl tinkering is needed before sending the request.
+
+SSL Cert Verification i,e to check a servers SSL certitifocate: requests.get('https://kennethreitz.com', verify=True)
+You can also specify a local cert to use as client side certificate, as a single file (containing the private key and the certificate) or as a tuple of both file’s path:
+requests.get('https://kennethreitz.com', cert='/wrong_path/server.pem')
+requests.get('https://kennethreitz.com', cert=('/path/server.crt', '/path/key'))
+
+By default, when you make a request, the body of the response is downloaded immediately. You can override this behavior and defer downloading the response body until you access the Response.content attribute with the stream parameter:
+tarball_url = 'https://github.com/kennethreitz/requests/tarball/master'
+r = requests.get(tarball_url, stream=True)
+
+Excellent news — thanks to urllib3, keep-alive is 100% automatic within a session! Any requests that you make within a session will automatically reuse the appropriate connection!
+Note that connections are only released back to the pool for reuse once all body data has been read; be sure to either set stream to False or read the content property of the Response object.
+
+Requests supports streaming uploads, which allow you to send large streams or files without reading them into memory. To stream and upload, simply provide a file-like object for your body:
+
+with open('massive-body', 'rb') as f:
+    requests.post('http://some.url/streamed', data=f)
+Chunk-Encoded Requests
+Requests also supports Chunked transfer encoding for outgoing and incoming requests. To send a chunk-encoded request, simply provide a generator (or any iterator without a length) for your body:
+
+def gen():
+    yield 'hi'
+    yield 'there'
+
+requests.post('http://some.url/chunked', data=gen())
 
 
 
+We can iterate over streaming apis doing the below:
+r = requests.get('http://httpbin.org/stream/20', stream=True)
+for line in r.iter_lines():
 
+PRoxies can be set as below:
+proxies = {
+  "http": "http://10.10.1.10:3128",
+  "https": "http://10.10.1.10:1080",
+}
+
+requests.get("http://example.org", proxies=proxies)
+
+
+When you receive a response, Requests makes a guess at the encoding to use for decoding the response when you access the Response.text attribute. Requests will first check for an encoding in the HTTP header, and if none is present, will use chardet to attempt to guess the encoding.
 
 
 
