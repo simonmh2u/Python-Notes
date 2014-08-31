@@ -450,4 +450,67 @@ def get_queryset(self):
         return Book.objects.filter(publisher=self.publisher)
 
 
-*Processing Forms with Clas Based Views*
+*DEBUGGING* 
+You have the option of django debug toolbar and also more awesome ones i,e django extension and werkzeug app which can give you console in browser for interactive
+debuggin when the exceoptin has occured.
+Use assert False where ever u want a break point then u can chk out the error in browser.
+Much more data is visible in APTANA debug mode as well whennu set breakpoints manually.
+django graphviz will give a UML like strucutre to your project models.
+The template_analyzer package offers an API to analyze the Django template structure. It can be used to find nodes of a particular type, e.g. to do automatic detection of placeholder tags.
+
+
+
+Template context processors.Every time you render a template, you give it a “context”; this is a dictionary-like object whose keys are variable names and whose values are the values of the variables. When you render a template with a given context, every key in the context dictionary becomes a variable in the template that you can access and use.RequestContext looks in your settings file for a setting called TEMPLATE_CONTEXT_PROCESSORS, which should be a tuple of callable objects, each of which should return a dictionary; RequestContext will loop over each one of them, call it, and add the key/value pairs from its returned dictionary to the template context as variables. Django includes a few built-in context processors (found in django.core.context_processors) which can add:
+The user who requested the page (django.core.context_processors.auth)
+A test for the DEBUG setting and a list of SQL executed in the request (django.core.context_processors.debug)
+Information about the language settings used for any translations performed by the internationalization system (django.core.context_processors.i18n)
+The full HttpRequest object for the current request (django.core.context_processors.requ
+
+
+MEssages : messages.sucess, failure etc will send the mesages , we just need to add the relevant middle ware and context processor.Also add
+relevant message tags in template
+
+*render message will send RequestContext by default compared to render_ro_response using which we manually send the context.
+
+Template Tags are used to create cutom tags ,filters for the templates for example we can wite our own function is a file called as filename_tags.py 
+in templatetags folder and load them in the template using {%load filename_tags %}
+
+*Signals*
+
+from django.db.models.signals import post_save # This is the event
+from django.dispatch import receiver # this is the decorator thats gonna connect the event and the opration to be performed after signal.
+
+@receiver(post_save,sender=User)
+def killme(sender,**kwargs):
+	if kwargs.get('created',False):
+		take action like , u = kwargs.get('instance')
+
+Custom signals can be created by a single line like below in signals.py in our app.
+for ex:
+article_change = django.dispatch.Signal()		
+
+THis above defined signal should be notified by using below
+article_change.send(self).
+
+Again any received can attach to it as shown above with receiver decorator.
+		
+**CELERY - RABBITMQ**
+
+RabbitMQ -  Create a user , create a vhost , provide permissions on the vhost for created users.
+BROKER_HOST , BROKER_PORT needs to be configured in the settings.py -- this should be where the MQ is running.
+Other configs include BROKER_VHOST, BROKER_USER, BROKER_PASSWORD.
+import djcelery ; djcelery.setup_loader() to be included as well for initial setup.
+
+Import the decorator from celery.task import task.
+use this decorator   @taskf or any method for which u would like celery to takre care of .
+
+./manage.py celeryd  -l info -- shows the whole setup info and starts the daemon.
+
+When callind the delaed method for which you have setup the @task decoraor you need to call it as methoname.delay(arge,arg2..) #delay is the key here which forces 
+it to use the Queue System.
+For ex :result = addnumbers.delay(1,2)
+result.status shows Success or Pending depending on the task is Success or still in progress.
+
+
+
+		

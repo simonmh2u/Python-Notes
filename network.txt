@@ -62,9 +62,83 @@ h = httplib2.Http('cache')  #u can use  disable_ssl_certificate_validation=True 
 resp, content =h.request('url= http://google.com', header={'x':y},ca_certs='/')
 resp = response headers , cont = full content
 
+*REQUESTS*
 import requests
 r = requests.get(url,data,headers,files) 
 requests.get('https://github.com', verify=True) # for enabling https
+ r = requests.put("http://httpbin.org/put")
+ r = requests.delete("http://httpbin.org/delete")
+ r = requests.head("http://httpbin.org/get")
+ r = requests.options("http://httpbin.org/get")
+ 
+ Consistent calls for all http methods as shown above.
+ 
+Below is how you send parametrs in a GET http call
+payload = {'key1': 'value1', 'key2': 'value2'}
+r = requests.get("http://httpbin.org/get", params=payload)
+
+print r.url wll show the actual get url
+http://httpbin.org/get?key2=value2&key1=value1
+
+print r.text shoes the response that we got back from the server.(Requests will automatically decode content from the server. Most unicode charsets are seamlessly decoded)
+r.encoding = 'ISO-8859-1' # This is how u can change the encoding of the response and then access r.text.
+For example, HTTP and XML have the ability to specify their encoding in their body. In situations like this, you should use r.content to find the encoding, and then set r.encoding. This will let you use r.text with the correct encoding.
+
+--Binary response Content can be used by r.content
+*Json data can be directly decoded by using r.json()
+
+Custome headers are sent as below:
+>>> import json
+>>> url = 'https://api.github.com/some/endpoint'
+>>> payload = {'some': 'data'}
+>>> headers = {'content-type': 'application/json'}
+
+>>> r = requests.post(url, data=json.dumps(payload), headers=headers)
+data arguement in post can be form encoded in which case u need to send a dict or a string as showsn in example above
+
+Posting a multipart-encoded file.
+>>> url = 'http://httpbin.org/post'
+>>> files = {'file': open('report.xls', 'rb')}
+>>> r = requests.post(url, files=files)
+
+You can set the filename, content_type and headers explicitly:
+files = {'file': ('report.xls', open('report.xls', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
+r.status_code give the response code.
+r.headers gives the respose headers
+r.cookies gets the cookies from response.
+
+to send cookies u do below
+>>> cookies = dict(cookies_are='working')
+>>> r = requests.get(url, cookies=cookies)
+
+r.history gives the history of redirects etc.
+
+requests.get('http://github.com', timeout=0.001) # time to wait by client when server dosent respond	
+
+In the event of a network problem (e.g. DNS failure, refused connection, etc), Requests will raise a ConnectionError exception.
+In the rare event of an invalid HTTP response, Requests will raise an HTTPError exception.
+If a request times out, a Timeout exception is raised.
+If a request exceeds the configured number of maximum redirections, a TooManyRedirects exception is raised.
+All exceptions that Requests explicitly raises inherit from requests.exceptions.RequestException.
+
+
+Session Objects:
+The Session object allows you to persist certain parameters across requests. It also persists cookies across all requests made from the Session instance.
+A Session object has all the methods of the main Requests API.
+Typical Session call:
+s = requests.Session()
+s.auth = ('user', 'pass')
+s.headers.update({'x-test': 'true'})
+# both 'x-test' and 'x-test2' are sent
+s.get('http://httpbin.org/headers', headers={'x-test2': 'true'})
+
+r.request.headers gives the headers sent in request to the server
+
+
+
+
+
+
 
 Imp difference : SOAP uses xml on http to formulate request and call individual methods associated with the webservice.
 REST just calls URL with arguments
