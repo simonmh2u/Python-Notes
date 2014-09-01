@@ -1,3 +1,4 @@
+**READ HANDOUT.PDF**
 psycopg2 api flow :
 connection = psycopg2.connect("user","pass","dbname")
 cur = connection.cursor()
@@ -9,28 +10,129 @@ connection.commit()
 *Bound parameters : emp_id is a bound parameter here and subsctituion is taen care by driver such as psycopg2
 cur.execute("select * from emptable  where employee_id = %(emp_id)",{'emp_id':5})
 
+* The first layer in SQlalchemy is called engine 
+
 * engine = create_engine("sqlite:///some.db") # Create Engine with lazy initilization
-result = engine.execute('select name from emp where emp_id=%(emp_id)',emp_id=3)
-row = result.fetchone() #returns a rowProxy which is a tuple which also acs like a dict and gives values based on key likes row['emp_id']
+engine = create_engine("postgres://simon:password@localhost/testdb") # Postgres initiliasation.
+or if you wann use specific driver
+engine = create_engine("postgres+psycopg2://simon:password@localhost/testdb") # Postgres initiliasation.
 
-* results close automatically when all rows are exhausted, but we can  |
-| also close explicitly. 
+result = engine.execute('select name from emp where emp_id=%(emp_id)',emp_id=3) #returns a rowProxy object.
+row = result.fetchone() # returns a tuple with values  which is a tuple which also acs like a dict and gives values based on key likes row['emp_id']
 
+* results close automatically when all rows are exhausted, but we can also close explicitly useing result.close()
 
+*result obejct can also be iterated upon instead os ufing fetchone
+ result = engine.execute("select * from employee")
+  for row in result:
+...     print(row)
 
-
-
-
-
-
-
-
-
-
-
-
-
+*result.fetchall() is the shortcut for producing the list of all rows
+>>> result = engine.execute("select * from employee")
+>>> print(result.fetchall())
+[(1, u'ed'), (2, u'jack'), (3, u'fred')]
 
 
+*The execute() method of Engine will *autocommit*  statements like INSERT UPDATE etc. by default.   
+example insert command: engine.execute("insert into employee (emp_name) values (:emp_name)",emp_name="dilbert") 
+
+We can control the scope of connection using connect().
+>>> conn = engine.connect()
+>>> result = conn.execute("select * from employee")
+>>> result.fetchall()
+>>> conn.close()
+
+
+*to run several statements inside a transaction, Connection features a begin() method that returns a Transaction.
+>>> conn = engine.connect()
+>>> trans = conn.begin()
+>>> conn.execute("insert into employee (emp_name) values (:emp_name)", emp_name="wendy")
+>>> conn.execute("update employee_of_month set emp_name = :emp_name", emp_name="wendy")
+>>> trans.commit()
+>>> conn.close()
+
+*Context manager used below to do the same transaction shit as above , beautifull
+>>> with engine.begin() as conn:
+...     conn.execute("insert into employee (emp_name) values (:emp_name)", emp_name="mary")
+...     conn.execute("update employee_of_month set emp_name = :emp_name", emp_name="mary")
+
+Engine Facts: Executing direcyly via the engins is called as connectionless execution as engine conencts and
+disconnects for us. Using a connection object we can control the span on connnection in use.
+
+
+**Schema and MetaData **
+The structure of a relational schema is represented in Python  using MetaData, Table, and other objects.
+
+from sqlalchemy import String MetaData,Integer,Column ,Table
+
+>>> metadata = MetaData()
+>>> user_table = Table('user', metadata,
+...                Column('id', Integer, primary_key=True),
+...                Column('name', String),
+...                Column('fullname', String)
+...              )
+
+>>> user_table.name
+'user'
+In : user_table.c.name
+Column('name', String(), table=<user>) # shows the details about columns
+In : user_table.c.id
+Column('id', Integer(), table=<user>, primary_key=True, nullable=False)
+
+*Table and MetaData objects can be used to generate a schema  in a database.   
+In : from sqlalchemy import create_engine
+In : engine = create_engine("sqlite://")
+In : metadata.create_all(engine)
+CREATE TABLE user (
+	id INTEGER NOT NULL, 
+	name VARCHAR, 
+	fullname VARCHAR, 
+	PRIMARY KEY (id)
+)
+
+
+*Types are represented using objects such as String, Integer,     
+ DateTime.  These objects can be specified as "class keywords",   
+ or can be instantiated with arguments.                           
+
+In : from sqlalchemy import String, Numeric, DateTime, Enum
+In : fancy_table = Table('fancy', metadata,
+...:                     Column('key', String(50), primary_key=True),
+...:                     Column('timestamp', DateTime),
+...:                     Column('amount', Numeric(10, 2)),		#
+...:                     Column('type', Enum('a', 'b', 'c'))   #Check constraint
+...:                 )
+In : fancy_table.create(engine)
+
+
+*Foreign Key
+In : from sqlalchemy import ForeignKey
+In : addresses_table = Table('address', metadata,
+...:                     Column('id', Integer, primary_key=True),
+...:                     Column('email_address', String(100), nullable=False),
+...:                     Column('user_id', Integer, ForeignKey('user.id'))
+...:                   )
+In : addresses_table.create(engine)
+
+Then emit metadata.create_all(), which will  emit CREATE TABLE for this table (it will skip those that already exist).
+
+On the contrary we have metadata.drop_all() and tablname.drop() methods to drop the tables.
+
+*'reflection' refers to loading Table objects based on  reading from an existing database.   
+In : metadata2 = MetaData()
+In : user_reflected = Table('user', metadata2, autoload=True, autoload_with=engine)
+
+*Information about a database at a more specific level is available  using the Inspector object.
+
+In : from sqlalchemy import inspect
+In : inspector = inspect(engine)
+Helpful in things like below:
+inspector.get_table_names()
+inspector.get_columns('address')
+inspector.get_foreign_keys('address')
+
+
+
+**SQL EXPRESSIONS***
 
 
