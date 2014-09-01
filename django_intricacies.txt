@@ -513,4 +513,33 @@ result.status shows Success or Pending depending on the task is Success or still
 
 
 
-		
+**CACHING**
+Typical Cache setting looks like below
+CACHES= {
+’default’: {
+        ’BACKEND’: ’django.core.cache.backends.memcached.MemcachedCache’,
+        ’LOCATION’: [’127.0.0.1:11211’,’172.19.26.242:11211’] # We can use multiple servers like this
+    }
+}
+
+python manage.py createcachetable [cache_table_name] # This command is used to create a caching database table.
+CACHES = { ’default’: {
+        ’BACKEND’: ’django.core.cache.backends.db.DatabaseCache’,
+        ’LOCATION’: ’my_cache_table’,
+    }
+}
+
+File systems based cache
+CACHES = { ’default’: {
+        ’BACKEND’: ’django.core.cache.backends.filebased.FileBasedCache’,
+        ’LOCATION’: ’/var/tmp/django_cache’,
+    }
+}
+
+Dummy for development:
+CACHES = { ’default’: {
+        ’BACKEND’: ’django.core.cache.backends.dummy.DummyCache’,
+    }
+}
+
+Other options that can be included in caching are TIMEOUT , MAX_ENTRIES etc. MAX_ENTRIES is when the cache needs to delete old entries default is 300
