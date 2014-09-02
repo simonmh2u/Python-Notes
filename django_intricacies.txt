@@ -572,3 +572,143 @@ The {% cache %} template tag caches the contents of the block for a given amount
 {% cache 500 sidebar %}
 .. sidebar ..
 {% endcache %}
+
+*Low level Cache API*
+, Django exposes a simple, low-level cache API. You can use this API to store objects in the cache with any level of granularity you like. You can cache any Python object that can be pickled safely: strings, dictionaries, lists of model objects, and so forth
+
+>>> from django.core.cache import get_cache
+>>> cache = get_cache('alternate')
+
+cache.set('k','val',30) #3rd augurme is timoue seconds until which the value shoul dbe in cache
+cache.get('k') #this gives val
+
+To add a key only if it doesn’t already exist, use the add() method. It takes the same parameters as set(), but it will not attempt to update the cache if the key specified is already present:
+>> cache.set('add_key', 'Initial value')
+>>> cache.add('add_key', 'New value')
+>>> cache.get('add_key')
+'Initial value'
+
+>>> cache.get_many(['a', 'b', 'c'])
+{'a': 1, 'b': 2, 'c': 3} #Takes multiple keys 
+>>> cache.set_many({'a': 1, 'b': 2, 'c': 3})
+>>> cache.get_many(['a', 'b', 'c'])
+{'a': 1, 'b': 2, 'c': 3}
+
+>>> cache.delete('a')
+>>> cache.delete_many(['a', 'b', 'c'])
+cache.clear() #this will clear the whole of cache
+
+
+
+
+*Django provides the ability to prefix all cache keys used by a server. When a particular cache key is saved or retrieved, Django will automatically prefix the cache key with the value of the KEY_PREFIX cache setting.By ensuring each Django instance has a different KEY_PREFIX, you can ensure that there will be no collisions in cache values.
+
+*Cache Versioning
+# Set version 2 of a cache key
+>>> cache.set('my_key', 'hello world!', version=2)
+# Get the default version (assuming version=1)
+>>> cache.get('my_key')
+None
+# Get version 2 of the same key
+>>> cache.get('my_key', version=2)
+'hello world!'
+
+*As described in the previous two sections, the cache key provided by a user is not used verbatim – it is combined with the cache prefix and key version to provide a final cache key. By default, the three parts are joined using colons to produce a final string:
+
+
+Controlling Cache:
+@cache_control(private=True)
+def my_view(request):
+    # ...
+	
+Full list :
+Any valid Cache-Control HTTP directive is valid in cache_control(). Here’s a full list:
+
+public=True
+private=True
+no_cache=True
+no_transform=True
+must_revalidate=True
+proxy_revalidate=True
+max_age=num_seconds
+s_maxage=num_seconds
+
+
+
+Other optimizations
+Django comes with a few other pieces of middleware that can help optimize your site’s performance:
+
+django.middleware.http.ConditionalGetMiddleware adds support for modern browsers to conditionally GET responses based on the ETag and Last-Modified headers.
+django.middleware.gzip.GZipMiddleware compresses responses for all modern browsers, saving bandwidth and transfer time. Be warned, however, that compression techniques like GZipMiddleware are subject to attacks. See the warning in GZipMiddleware for details.
+
+
+
+
+
+*Templates:
+
+Variables
+Variables look like this: {{ variable }}. When the template engine encounters a variable, it evaluates that variable and replaces it with the result.
+Filters:
+Some commonly used filters : length , striptags etc.
+
+Tags
+Tags look like this: {% tag %}, commonly used tags include if , for , extends , block etc.
+
+base.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css" />
+    <title>{% block title %}My amazing site{% endblock %}</title>
+</head>
+
+<body>
+    <div id="sidebar">
+        {% block sidebar %}
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/blog/">Blog</a></li>
+        </ul>
+        {% endblock %}
+    </div>
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
+
+In this example, the block tag defines three blocks that child templates can fill in. All the block tag does is to tell the template engine that a child template may override those portions of the template.
+
+A child template might look like this:
+
+{% extends "base.html" %}
+
+{% block title %}My amazing blog{% endblock %}
+
+{% block content %}
+{% for entry in blog_entries %}
+    <h2>{{ entry.title }}</h2>
+    <p>{{ entry.body }}</p>
+{% endfor %}
+{% endblock %
+
+The extends tag is the key here. It tells the template engine that this template “extends” another template. When the template system evaluates this template, first it locates the parent – in this case, “base.html”.
+At that point, the template engine will notice the three block tags in base.html and replace those blocks with the contents of the child template.
+###You can use as many levels of inheritance as needed. One common way of using inheritance is the following three-level approach:
+
+Create a base.html template that holds the main look-and-feel of your site.
+Create a base_SECTIONNAME.html template for each “section” of your site. For example, base_news.html, base_sports.html. These templates all extend base.html and include section-specific styles/design.
+Create individual templates for each type of page, such as a news article or blog entry. These templates extend the appropriate section template
+
+HTML Escaping
+*By default in Django, every template automatically escapes the output of every variable tag. Specifically, these five characters are escaped:
+
+< is converted to &lt;
+> is converted to &gt;
+' (single quote) is converted to &#39;
+" (double quote) is converted to &quot;
+& is converted to &amp;
+
+**Because Django intentionally limits the amount of logic processing available in the template language, it is not possible to pass arguments to method calls accessed from within templates
