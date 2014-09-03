@@ -76,7 +76,7 @@ Lists let you associate an array of values to a single key. In fact, you can (an
 Hash:The hash data structure is exactly what you are thinking it is (a hash/dictionary).
 >hmset user:1000 username antirez birthyear 1977 verified 1
 OK
-> hget user:1000 username
+>   user:1000 username
 "antirez"
 
 Other commands :
@@ -137,3 +137,156 @@ zrangebyscore hackers -inf 1950
 3) "Claude Shannon"
 4) "Alan Kay"
 5) "Anita Borg"
+
+
+
+
+Model for Twitter : 
+
+users hash containing userame and password -- when the user is created add entries in this hash.
+somethign like 
+set user_id 1000
+incr user_id
+users:user_id username "Simon" password "pass"
+
+following sorted set  -- add the userd ids of users you follow when  you clik the folow button
+somethign like
+following:user_id time() 999 time() 1023 # time is the score used here
+followers sorted set -- add the user ids of users that are following you
+following:user_id time() 888 time() 0988 #time is the score
+
+When user posts something by clicking post button we ad it into post hash something like.
+post:post_id time time() userid user_id status "Message"
+
+You also go ahead and add this post into posts list of all the users follwing you (called as Fanout)
+posts:user_id post_id1,post_id2 ....
+
+
+
+REDIS Python Binding :
+r = redis.StrictRedis(host='localhost', port=6379, db=0)
+r.set('foo','bar')
+r.get('foo')
+
+By default, each Redis instance you create will in turn create
+its own connection pool. You can override this behavior and use an existing
+connection pool by passing an already created connection pool instance to the
+connection_pool argument of the Redis class
+
+ >>> pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
+ >>> r = redis.Redis(connection_pool=pool)
+ 
+U can use unix domain sockets as below
+r = redis.Redis(unix_socket_path='/tmp/redis.sock')
+
+
+Parser classes provide a way to control how responses from the Redis server
+are parsed. redis-py ships with two parser classes, the PythonParser and the
+HiredisParser. By default, redis-py will attempt to use the HiredisParser if
+you have the hiredis module installed and will fallback to the PythonParser
+otherwise
+
+Pipelines are a subclass of the base Redis class that provide support for
+buffering multiple commands to the server in a single request. They can be used
+to dramatically increase the performance of groups of commands by reducing the
+number of back-and-forth TCP packets between the client and server.
+
+
+    >>> r = redis.Redis(...)
+    >>> r.set('bing', 'baz')
+    >>> # Use the pipeline() method to create a pipeline instance
+    >>> pipe = r.pipeline()
+    >>> # The following SET commands are buffered
+    >>> pipe.set('foo', 'bar')
+    >>> pipe.get('bing')
+    >>> # the EXECUTE call sends all buffered commands to the server, returning
+    >>> # a list of responses, one for each command.
+    >>> pipe.execute()
+
+They can be chained as below:
+pipe.set('foo', 'bar').sadd('faz', 'baz').incr('auto_number').execute()
+
+
+redis-py includes a `PubSub` object that subscribes to channels and listens
+for new messages. Creating a `PubSub` object is 
+>>> p.subscribe('my-first-channel', 'my-second-channel', ...)
+>>> p.psubscribe('my-*', ...)
+
+>>> p.get_message()
+{'pattern': None, 'type': 'subscribe', 'channel': 'my-second-channel', 'data': 1L}
+
+>>> r.publish('my-channel','Hellp')
+>>> p.get_message()
+{'channel': 'my-channel', data': 'Hellp', 'pattern': None, 'type': 'message'}
+
+Useful code block for pubsub
+   >>> while True:
+    >>>     message = p.get_message()
+    >>>     if message:
+    >>>         # do something with the message
+    >>>     time.sleep(0.001)
+
+
+
+Some examples:
+
+>>> import redis
+>>> r_server = redis.Redis("localhost")
+
+
+Data structure: String
+>>> r_server.set("name", "DeGizmo")
+True
+>>> r_server.get("name")
+'DeGizmo'
+
+Integer
+>>> r_server.set("hit_counter", 1)
+True
+>>> r_server.incr("hit_counter")
+2
+>>> r_server.get("hit_counter")
+'2'
+
+Lists:
+>>> r_server.rpush("members", "Carol")
+True
+>>> r_server.lrange("members", 0, -1)
+['Adam', 'Bob', 'Carol']
+>>> r_server.llen("members")
+3
+>>> r_server.lindex("members", 1)
+'Bob'
+>>> r_server.rpop("members")
+'Carol'
+>>> r_server.lrange("members", 0, -1)
+['Adam', 'Bob']
+>>> r_server.lpop("members")
+'Adam'
+>>> r_server.lrange("members", 0, -1)
+['Bob']
+
+
+Set;
+>>> r_server.sadd("members", "Carol")
+True
+>>> r_server.sadd("members", "Adam")
+False
+>>> r_server.smembers("members")
+set(['Bob', 'Adam', 'Carol'])
+
+
+Sorted Sets:
+
+>>> r_server.zadd("stories:frontpage", "storyid:3123", 34)
+True
+>>> r_server.zadd("stories:frontpage", "storyid:9001", 3)
+True
+>>> frontpage = r_server.zrange("stories:frontpage", 0, -1, withscores=True)
+>>> frontpage.reverse()
+>>> frontpage
+[('storyid:2134', 127.0), ('storyid:3123', 34.0), ('storyid:9001', 3.0)]
+
+
+slaveoff is the config used for relpication which , the slave pulls data frmo master ans syncs it self.
+usually slave is read only and only master takes writes.
