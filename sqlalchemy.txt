@@ -116,7 +116,7 @@ In : addresses_table.create(engine)
 
 Then emit metadata.create_all(), which will  emit CREATE TABLE for this table (it will skip those that already exist).
 
-On the contrary we have metadata.drop_all() and tablname.drop() methods to drop the tables.
+On the contrary we have metadata.drop_all() and tablname.drop() methods to drop the tables.dropa;l takes care of all constraints
 
 *'reflection' refers to loading Table objects based on  reading from an existing database.   
 In : metadata2 = MetaData()
@@ -134,5 +134,159 @@ inspector.get_foreign_keys('address')
 
 
 **SQL EXPRESSIONS***
+
+
+In : user_table.c.username == 'ed'
+<sqlalchemy.sql.elements.BinaryExpression object at 0x9d9c66c>
+They become SQL when evaluated as a string as shown below
+In : str(user_table.c.username == 'ed')
+'"user".username = :username_1
+
+ OR and AND are available with |, &, or or_() and and_()          |
+
+In : from sqlalchemy import and_, or_
+
+In : print(
+...:     and_(
+...:         user_table.c.fullname == 'ed jones',
+...:             or_(
+...:                 user_table.c.username == 'ed',
+...:                 user_table.c.username == 'jack'
+...:             )
+...:         )
+...:     )
+"user".fullname = :fullname_1 AND ("user".username = :username_1 OR "user".username = :username_2)
+
+
+*Using an  IN operator
+In : print(user_table.c.username.in_(["wendy", "mary", "ed"]))
+"user".username IN (:username_1, :username_2, :username_3)
+
+*In : expression = user_table.c.username == 'ed'
+In : print(expression)
+"user".username = :username_1
+
+The values of our "bound" parameters are still there, however,   stored away within a structure called the "compiled" object      
+In : compiled = expression.compile()
+In : compiled.params
+{u'username_1': 'ed'}
+
+In : expression.operator
+<built-in function eq>
+In : expression.left
+Column('username', String(length=50), table=<user>)
+In : expression.right
+BindParameter('%(165268972 username)s', 'ed', type_=String(length=50))
+
+
+*The "bound" parameters are extracted when we execute()           
+
+*Select Statement
+In : engine.execute(
+...:         user_table.select().where(user_table.c.username == 'ed')
+...:     )
+
+Other way of select :
+In : from sqlalchemy import select
+In : select_stmt = select([user_table.c.username, user_table.c.fullname]).\
+...:             where(user_table.c.username == 'ed')
+In : result = conn.execute(select_stmt)
+In : for row in result:
+...:     print(row)
+
+*select all columns from a table
+In : select_stmt = select([user_table])
+In : conn.execute(select_stmt).fetchall()
+
+* specify a WHERE clause                                           
+In : select_stmt = select([user_table]).\
+...:                     where(
+...:                         or_(
+...:                             user_table.c.username == 'ed',
+...:                             user_table.c.username == 'wendy'
+...:                         )
+...:                     )
+In : conn.execute(select_stmt).fetchall()
+
+*specify multiple WHERE, will be joined by AND #This is called method chaining 
+In : select_stmt = select([user_table]).\
+...:                     where(user_table.c.username == 'ed').\
+...:                     where(user_table.c.fullname == 'ed jones')
+In : conn.execute(select_stmt).fetchall()
+
+
+
+
+String or SQl representation
+In : print user_table.select()
+SELECT "user".id, "user".username, "user".fullname FROM "user"
+In : print user_table.c.username == 'ed'
+"user".username = :username_1
+
+*Dialect can be chaned as below , 
+ print(expression.compile(dialect=postgresql.dialect())) 
+
+*Insert Statement
+In : insert_stmt = user_table.insert().values(username='ed', fullname='Ed Jones')
+In : conn = engine.connect()
+In : result = conn.execute(insert_stmt)
+
+*Multiple Inserts at once 
+In : conn.execute(user_table.insert(), [
+...:     {'username': 'jack', 'fullname': 'Jack Burger'},
+...:     {'username': 'wendy', 'fullname': 'Wendy Weathersmith'}
+
+
+*Updates:
+to round out INSERT and SELECT, this is an UPDATE                |
+
+In : update_stmt = user_table.update().values(fullname="Jack Brown").\
+...:                     where(user_table.c.username == "jack")
+In : result = conn.execute(update_stmt)
+
+
+*Deletes;
+In : delete_stmt = user_table.delete().where(user_table.c.username == 'jack')
+In : result = conn.execute(delete_stmt)
+
+result.rowcoutn gives the nuber of rows that were affected.
+
+*Joins:
+Two tables can be joined as below
+join_obj = user_table.join(address_table,user_table.c.id == address_table.c.user_id)
+ForeignKey allows the join() to figure out the ON clause automatically  so even below would suffice
+join_obj = user_table.join(address_table)
+
+to SELECT from a JOIN, use select_from()                         |
+In : select_stmt = select([user_table, address_table]).select_from(join_obj)
+
+In SQL, a "subquery" is usually an alias() of a select()  
+In : select_alias = select_stmt.alias()
+In : print(
+...:     select([select_alias.c.username]).
+...:         where(select_alias.c.username == 'ed')
+...:    )
+
+
+***ORM ***
+
+SQLAlchemy is a data mapper style ORM like Hibernate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

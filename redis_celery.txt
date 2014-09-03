@@ -1,0 +1,139 @@
+REDIS
+Redis supports five different data structures: strings, hashes, lists, sets and ordered sets
+
+Strings:
+SET pages:about "about us"
+GET pages:about
+or 
+
+127.0.0.1:6379> set  number:1 1
+OK
+127.0.0.1:6379> get number:1
+"1"
+
+DEL , TYPE ,EXISTS, INCR , INCRBY , DECR DECRBY , MGET(multiple) , MSET (multiple),GETSET(get old value set new value) are other commands 
+
+> exists mykey
+(integer) 1
+> set mykey x
+OK
+> del mykey
+(integer) 1
+
+> mset a 10 b 20 c 30
+OK
+> mget a b c
+1) "10"
+2) "20"
+3) "30
+
+> incr counter
+(integer) 102
+> incrby counter 50
+(integer) 152
+
+> expire key 5 # key gets deleted after 5 seconds
+(integer) 1
+
+> set key 100 ex 10 # setting expiry in one command
+ttl key is used to find the expory tmie
+
+
+
+****List:*****
+PUsh commands
+> rpush mylist A
+(integer) 1
+> rpush mylist B
+(integer) 2
+> lpush mylist first
+(integer) 3
+> lrange mylist 0 -1  (-1 is the last element index just like pythonlists)
+1) "first"
+2) "A"
+3) "B
+
+On the contrary rpop, lpop are the commnds used to remove elements from cache.
+
+Lists are useful for a number of tasks, two very representative use cases are the following:
+# Remember the latest updates posted by users into a social network.
+# Communication between processes, using a consumer-producer pattern where the producer pushes items into a list, 
+and a consumer (usually a worker) consumes those items executing actions. Redis has special list commands to make 
+this use case both more reliable and efficient.
+
+ltrim mylist 0 2 will just trip the list to the specific index size and discard remainging elements.
+brpop , blpop are blocking commands i.e they wait on the queue if its empty until a producter pushes somethin onto them.
+
+*When we add an element to an aggregate data type, if the target key does not exist, an empty aggregate data type is crated before
+ adding the element and hence subsequent commands shuold match the data type created.
+
+*When we remove elements from an aggregate data type, if the value remains empty, the key is automatically destroyed.
+Lists let you associate an array of values to a single key. In fact, you can (and should) think of them as dynamic arrays. You can insert, append, pop, push, trim and so on.
+
+
+**HASHES***
+
+Hash:The hash data structure is exactly what you are thinking it is (a hash/dictionary).
+>hmset user:1000 username antirez birthyear 1977 verified 1
+OK
+> hget user:1000 username
+"antirez"
+
+Other commands :
+hincrby user:1000 birthyear 10
+
+
+
+****Sets:*****
+Sets are a lot like lists, except they provide set-semantics (no duplicate values in a given set). You can diff sets via SDIFF, union two sets via SUNION or SUNIONSTORE .
+> sadd myset 1 2 3
+(integer) 3
+> smembers myset
+1. 3
+2. 1
+3. 2
+
+> sismember myset 3  #true if present in set
+(integer) 1
+> sismember myset 30
+(integer) 0
+
+Sets are good for expressing relations between objects
+Simple way to model this problem is to have a set for every object we want to tag. The set contains the IDs of the tags associated with the object.
+Imagine we want to tag news. If our news ID 1000 is tagged with tag 1,2,5 and 77, we can have one set associating our tag IDs with the news:
+> sadd news:1000:tags 1 2 5 77
+(integer) 4
+> sadd tag:1:news 1000
+(integer) 1
+> sadd tag:2:news 1000
+(integer) 1
+> sadd tag:5:news 1000
+(integer) 1
+> sadd tag:77:news 1000
+(integer) 1
+
+sinter tag:1:news tag:2:news tag:10:news tag:27:news # Gives all news items with mentioned tags
+Sinter is the intersection between sets.Intersection is not the only operation performed, you can also perform unions, difference, extract a random element, and so forth.
+scard returns number if elements in a set.
+
+
+
+Sorted Sets;
+It's wrong to call one structure more powerful than the others, since they all tend to serve fairly distinct needs,
+ but sorted sets are pretty awesome. A sorted set is similar to a set, except each value is associated (and sorted by) a score field.
+Sorted sets are a data type which is similar to a mix between asSet and an hash. Like sets, sorted sets are composed of unique, non-repeating string elements, so in some sense a sorted set is a set as well.
+> zadd hackers 1940 "Alan Kay"
+(integer) 1
+> zadd hackers 1957 "Sophie Wilson"
+(integer 1)
+
+zrange hackers 0 -1
+zrevrange hackers 0 -1
+zrange hackers 0 -1 withscores
+
+zrangebyscore hackers -inf 1950
+1) "Alan Turing"
+2) "Hedy Lamarr"
+3) "Claude Shannon"
+4) "Alan Kay"
+5) "Anita Borg"
