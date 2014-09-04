@@ -290,3 +290,25 @@ True
 
 slaveoff is the config used for relpication which , the slave pulls data frmo master ans syncs it self.
 usually slave is read only and only master takes writes.
+
+
+
+
+***************CELERY**********************
+
+GEneral Async Use Cases for Celery:
+*geenrating assets after upload , like resigin pics etc.
+*notifying users when an even t happends like , when somone start to follow you , send email
+*Keeping search index uptodate
+*replaceing cron jobs.
+
+
+Mesage broker stores tasks on queues , allows workers on diff machne/proces to produce consume tasks.
+The broker stors the data that answers the question ' What work remains to be done ?'
+Result Backend: To track state of the task and the return values once the task is complete.
+
+producer --> Broker --> consumer -> workers --> result backend (except broker and result backend all components are part of celery)
+
+Dont pass object instances to calery tasks.
+For concurrency use multiprocessnig
+profile stuff and break down tasks.
