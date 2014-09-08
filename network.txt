@@ -76,7 +76,7 @@ requests.get('https://github.com', verify=True) # for enabling https
 Below is how you send parametrs in a GET http call
 payload = {'key1': 'value1', 'key2': 'value2'}
 r = requests.get("http://httpbin.org/get", params=payload)
-
+auth
 print r.url wll show the actual get url
 http://httpbin.org/get?key2=value2&key1=value1
 
@@ -162,7 +162,7 @@ requests.post('http://some.url/chunked', data=gen())
 
 
 
-We can iterate over streaming apis doing the below:
+We can iterate over streaming apis ( Twitter Streaming API.)doing the below:
 r = requests.get('http://httpbin.org/stream/20', stream=True)
 for line in r.iter_lines():
 
@@ -175,7 +175,28 @@ proxies = {
 requests.get("http://example.org", proxies=proxies)
 
 
+*Event Hooks
+Requests has a hook system that you can use to manipulate portions of the request process, or signal event handling.
+print url function is being called upon response from the url
+>>> requests.get('http://httpbin.org', hooks=dict(response=print_url))
+http://httpbin.org
+<Response [200]>
+
+Encoding:
 When you receive a response, Requests makes a guess at the encoding to use for decoding the response when you access the Response.text attribute. Requests will first check for an encoding in the HTTP header, and if none is present, will use chardet to attempt to guess the encoding.
+
+Authentcation:
+>>> from requests.auth import HTTPBasicAuth
+>>> auth = HTTPBasicAuth('fake@example.com', 'not_a_real_password')
+>>> r = requests.post(url=url, data=body, auth=auth)
+
+
+Specify connect and read timeouts separately :
+r = requests.get('https://github.com', timeout=(3.05, 27))
+r = requests.get('https://github.com', timeout=(3.05, 27))
+
+
+
 
 
 
