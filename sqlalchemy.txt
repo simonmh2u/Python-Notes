@@ -272,21 +272,171 @@ In : print(
 
 SQLAlchemy is a data mapper style ORM like Hibernate
 
+Createing a Table in ORM layer as below : 
+>>> from sqlalchemy.ext.declarative import declarative_base
+>>> Base = declarative_base()
+
+>>> from sqlalchemy import Column, Integer, String
+
+>>> class User(Base):
+...     __tablename__ = 'user'
+
+...     id = Column(Integer, primary_key=True)
+...     name = Column(String)
+...     fullname = Column(String)
 
 
+User.__table__
+This now showa the table strcure used by us in SQL expressions.
 
 
+ User has a default constructor, accepting field names as arguments. 
+
+>>> ed_user = User(name='ed', fullname='Edward Jones')
 
 
+| The MetaData object is here too, available from the Base.        |
++------------------------------------------------------ (7 / 72) --+
+
+>>> from sqlalchemy import create_engine
+>>> engine = create_engine('sqlite://')
+>>> Base.metadata.create_all(engine)
+
+[press return to run code]
+[SQL]: PRAGMA table_info("user")
+[SQL]: ()
+[SQL]:
+CREATE TABLE user (
+	id INTEGER NOT NULL,
+	name VARCHAR,
+	fullname VARCHAR,
+	PRIMARY KEY (id)
+)
 
 
+*To persist and load User objects from the database, we use a Session object.                                           
+
+>>> from sqlalchemy.orm import Session
+>>> session = Session(bind=engine)
+| new objects are placed into the Session using add().             |
+>>> session.add(ed_user)
+
+| new objects are placed into the Session using add().             |
++------------------------------------------------------ (9 / 72) --+
+
+>>> session.add(ed_user)
+
+the Session will *flush* *pending* objects to the database before each Query.       
+
+>>> our_user = session.query(User).filter_by(name='ed').first()
+>>> our_user
+
+[press return to run code]
+[SQL]: BEGIN (implicit)
+[SQL]: INSERT INTO user (name, fullname) VALUES (?, ?)
+[SQL]: ('ed', 'Edward Jones')
+[SQL]: SELECT user.id AS user_id, user.name AS user_name, user.fullname AS user_fullname
+FROM user
+WHERE user.name = ?
+ LIMIT ? OFFSET ?
+[SQL]: ('ed', 1, 0)
+<User('ed', 'Edward Jones')>
+
+the Session maintains a *unique* object per identity. so "ed_user" and "our_user" are the *same* object   
+>>> ed_user is our_user
+True
+
++------------------------------------------------------------------+
+| Add more objects to be pending for flush.                        |
++----------------------------------------------------- (13 / 72) --+
+>>> session.add_all([
+...     User(name='wendy', fullname='Wendy Weathersmith'),
+...     User(name='mary', fullname='Mary Contrary'),
+...     User(name='fred', fullname='Fred Flinstone')
+>>> ])
+
+modify "ed_user" - the object is now marked as *dirty*
+>>> ed_user.fullname = 'Ed Jones'
+>>> session.dirty 							#Dirty hols the entries waiting to be updated or modified in database
+IdentitySet([<User('ed', 'Ed Jones')>])
+
+| and can also tell us which objects are pending...                |
++----------------------------------------------------- (16 / 72) --+
+
+>>> session.new								#New holds objects not yet inserted into database.
+IdentitySet([<User('wendy', 'Wendy Weathersmith')>, <User('mary', 'Mary Contrary')>, <User('fred', 'Fred Flinstone')>])
+
+session.commit() will commit or save all pending changes to databse.
+
+A flush always happens after commit and right before we issue s query to databse.
+
+press return to run code]
+[SQL]: UPDATE user SET fullname=? WHERE user.id = ?
+[SQL]: ('Ed Jones', 1)
+[SQL]: INSERT INTO user (name, fullname) VALUES (?, ?)
+[SQL]: ('wendy', 'Wendy Weathersmith')
+[SQL]: INSERT INTO user (name, fullname) VALUES (?, ?)
+[SQL]: ('mary', 'Mary Contrary')
+[SQL]: INSERT INTO user (name, fullname) VALUES (?, ?)
+[SQL]: ('fred', 'Fred Flinstone')
+[SQL]: COMMIT
+
+**Very Important**
+| After a commit, theres no transaction.  The Session                |
+| *invalidates* all data, so that accessing them will automatically  |
+| start a *new* transaction and re-load from the database.           |
++------------------------------------------------------- (18 / 72) --+
+
+>>> ed_user.fullname
+
+[press return to run code]
+[SQL]: BEGIN (implicit)
+[SQL]: SELECT user.id AS user_id, user.name AS user_name, user.fullname AS user_fullname
+FROM user
+WHERE user.id = ?
+[SQL]: (1,)
+u'Ed Jones'
 
 
+| Make another "dirty" change, and another "pending" change,       |
+| that we might change our minds about.                            |
++----------------------------------------------------- (19 / 72) --+
+>>> ed_user.name = 'Edwardo'
+>>> fake_user = User(name='fakeuser', fullname='Invalid')
+>>> session.add(fake_user)
 
 
+| run a query, our changes are flushed; results come back.         |
++----------------------------------------------------- (20 / 72) --+
+
+>>> session.query(User).filter(User.name.in_(['Edwardo', 'fakeuser'])).all()
+
+[press return to run code]
+[SQL]: UPDATE user SET name=? WHERE user.id = ?
+[SQL]: ('Edwardo', 1)
+[SQL]: INSERT INTO user (name, fullname) VALUES (?, ?)
+[SQL]: ('fakeuser', 'Invalid')
+[SQL]: SELECT user.id AS user_id, user.name AS user_name, user.fullname AS user_fullname
+FROM user
+WHERE user.name IN (?, ?)
+[SQL]: ('Edwardo', 'fakeuser')
+[<User('Edwardo', u'Ed Jones')>, <User('fakeuser', 'Invalid')>]
+| But we're inside of a transaction.  Roll it back.                |
++----------------------------------------------------- (21 / 72) --+
+>>> session.rollback()
+[SQL]: ROLLBACK
++------------------------------------------------------------------+
+| ed_user's name is back to normal                                 |
++----------------------------------------------------- (22 / 72) --+
+>>> ed_user.name
+[press return to run code]
+[SQL]: BEGIN (implicit)
+[SQL]: SELECT user.id AS user_id, user.name AS user_name, user.fullname AS user_fullname
+FROM user
+WHERE user.id = ?
+[SQL]: (1,)
+u'ed
 
 
-
-
-
+**ORM Querying**
 
