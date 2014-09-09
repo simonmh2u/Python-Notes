@@ -562,3 +562,31 @@ proc = subprocess.Popen(’cat -; echo "to stderr" 1>&2’,shell=True,stdin=subp
 stdout_value, stderr_value = proc.communicate(’through stdin to stdout’)
 
 
+*Logging*
+
+Most applications are probably going to want to log to a file. Use the basicConfig() function to set up the default
+handler so that debug messages are written to a file.
+LOG_FILENAME = ’logging_example.out’
+logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG,) #Handler beng set up
+logging.debug(’This message should go to the log file’)
+
+Rotating Log File :
+my_logger = logging.getLogger(’MyLogger’)
+my_logger.setLevel(logging.DEBUG)
+# Add the log message handler to the logger
+handler = logging.handlers.RotatingFileHandler(LOG_FILENAME,maxBytes=20,backupCount=5,)
+my_logger.addHandler(handler)
+
+Level		Value
+CRITICAL	50
+ERROR	40
+WARNING	30
+INFO	20
+DEBUG	10
+UNSET	0
+
+ The log message is only emitted if the handler and
+logger are configured to emit messages of that level or higher. For example, if a message is CRITICAL, and the logger
+is set to ERROR, the message is emitted (50 > 40). If a message is a WARNING, and the logger is set to produce only
+messages set to ERROR, the message is not emitted (30 < 40).
+kl

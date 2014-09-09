@@ -843,3 +843,280 @@ def current_time(context, format_string):
 
 
 *INclusion Tags*
+Another common type of template tag is the type that displays some data by rendering another template.
+They’re a perfect case for using a small template that is filled with details from the current object.
+{% show_results poll %}
+
+...and the output will be something like this:
+
+<ul>
+  <li>First choice</li>
+  <li>Second choice</li>
+  <li>Third choice</li>
+</ul>
+
+First, define the function that takes the argument and produces a dictionary of data for the result. The important point here is we only need to return a dictionary, not anything more complex. This will be used as a template context for the template fragment. Example:
+
+def show_results(poll):
+    choices = poll.choice_set.all()
+    return {'choices': choices}
+
+Next, create the template used to render the tag’s output. This template is a fixed feature of the tag: the tag writer specifies it, not the template designer. Following our example, the template is very simple:
+
+<ul>
+{% for choice in choices %}
+    <li> {{ choice }} </li>
+{% endfor %}
+</ul>
+
+@register.inclusion_tag('results.html')
+def show_results(poll):
+
+your inclusion tags might require a large number of arguments, making it a pain for template authors to pass in all the arguments and remember their order. To solve this, Django provides a takes_context option for inclusion tags. If you specify takes_context in creating a template tag, the tag will have no required arguments, and the underlying Python function will have one argument – the template context as of when the tag was called.
+ex:
+def jump_link(context):
+    return {
+        'link': context['home_link'],
+        'title': context['home_title'],
+    }
+# Register the custom tag as an inclusion tag with takes_context=True.
+register.inclusion_tag('link.html', takes_context=True)(jump_link).
+
+It can also take positional arguements; as shown below:
+@register.inclusion_tag('my_template.html')
+def my_tag(a, b, *args, **kwargs):
+    warning = kwargs['warning']
+    profile = kwargs['profile']
+    ...
+    return ...
+
+Then in the template any number of arguments, separated by spaces, may be passed to the template tag. Like in Python, the values for keyword arguments are set using the equal sign (“=”) and must be provided after the positional arguments. For example:
+
+{% my_tag 123 "abcd" book.title warning=message|lower profile=user.profile %}
+
+
+Setting Varialbes in context:
+{% current_time "%Y-%M-%d %I:%M %p" as my_current_time %}
+<p>The current time is {{ my_current_time }}.</p>
+
+To do that, you’ll need to refactor both the compilation function and Node class, like so:
+
+class CurrentTimeNode3(template.Node):
+    def __init__(self, format_string, var_name):
+        self.format_string = format_string
+        self.var_name = var_name
+    def render(self, context):
+        context[self.var_name] = datetime.datetime.now().strftime(self.format_string)
+        return '' #REturning empty string
+
+*Assignment Tag*
+To ease the creation of tags setting a variable in the context, Django provides a helper function, assignment_tag. This function works the same way as simple_tag, except that it stores the tag’s result in a specified context variable instead of directly outputting it.
+def get_current_time(format_string):
+    return datetime.datetime.now().strftime(format_string)
+
+register.assignment_tag(get_current_time)
+
+The decorator syntax also works:
+
+@register.assignment_tag
+def get_current_time(format_string):
+    ...
+
+You may then store the result in a template variable using the as argument followed by the variable name, and output it yourself where you see fit:
+
+{% get_current_time "%Y-%m-%d %I:%M %p" as the_time %}
+<p>The time is {{ the_time }}.</p>
+
+Same takes_context holds good for assignment tag as inclusion tag
+
+**Template tags can work in tandem. For instance, the standard {% comment %} tag hides everything until {% endcomment %}. To create a template tag such as this, use parser.parse() in your compilation function.
+
+
+
+
+
+
+**PAGINATION***
+Give Paginator a list of objects, plus the number of items you’d like to have on each page, and it gives you methods for accessing the items for each page:
+
+>>> from django.core.paginator import Paginator
+>>> objects = ['john', 'paul', 'george', 'ringo']
+>>> p = Paginator(objects, 2)
+
+>>> p.count
+4
+>>> p.num_pages
+2
+>>> p.page_range
+[1, 2]
+
+>>> page1 = p.page(1)
+>>> page1
+<Page 1 of 2>
+>>> page1.object_list
+['john', 'paul']
+Note that you can give Paginator a list/tuple, a Django QuerySet, or any other object with a count() or __len__() method.
+
+Using Paginator in a view
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+def listing(request):
+    contact_list = Contacts.objects.all()
+    paginator = Paginator(contact_list, 25) # Show 25 contacts per page
+
+    page = request.GET.get('page')
+    try:
+        contacts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        contacts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        contacts = paginator.page(paginator.num_pages)
+
+    return render_to_response('list.html', {"contacts": contacts})
+
+In the template list.html, you’ll want to include navigation between pages along with any interesting information from the objects themselves:
+
+{% for contact in contacts %}
+    {# Each "contact" is a Contact model object. #}
+    {{ contact.full_name|upper }}<br />
+    ...
+{% endfor %}
+
+<div class="pagination">
+    <span class="step-links">
+        {% if contacts.has_previous %}
+            <a href="?page={{ contacts.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ contacts.number }} of {{ contacts.paginator.num_pages }}.
+        </span>
+
+        {% if contacts.has_next %}
+            <a href="?page={{ contacts.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+
+
+**LOGGING**
+A Python logging configuration consists of four parts:
+    Loggers
+    Handlers
+    Filters
+    Formatters
+
+A logger is the entry point into the logging system. Each logger is a named bucket to which messages can be written for processing..A logger is configured to have a log level. This log level describes the severity of the messages that the logger will handle. Python defines the following log levels:DEBUG,INFI,WARNING, ERROR, CRITICAL
+When a message is given to the logger, the log level of the message is compared to the log level of the logger. If the log level of the message meets or exceeds the log level of the logger itself, the message will undergo further processing to Handler.
+
+The handler is the engine that determines what happens to each message in a logger. It describes a particular logging behavior, such as writing a message to the screen, to a file, or to a network socket.
+Like loggers, handlers also have a log level. If the log level of a log record doesn’t meet or exceed the level of the handler, the handler will ignore the message
+A logger can have multiple handlers, and each handler can have a different log level. In this way, it is possible to provide different forms of notification depending on the importance of a message. For example, you could install one handler that forwards ERROR and CRITICAL messages to a paging service, while a second handler logs all messages (including ERROR and CRITICAL messages) to a file for later analysis.
+
+A filter is used to provide additional control over which log records are passed from logger to handler.
+Filters can also be used to modify the logging record prior to being emitted. For example, you could write a filter that downgrades ERROR log records to WARNING records if a particular set of criteria are met.
+Filters can be installed on loggers or on handlers; multiple filters can be used in a chain to perform multiple filtering actions.
+
+Ultimately, a log record needs to be rendered as text. Formatters describe the exact format of that text. A formatter usually consists of a Python formatting string; however, you can also write custom formatters to implement specific formatting behavior.
+
+The call to logging.getLogger() obtains (creating, if necessary) an instance of a logger. 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+        'special': {
+            '()': 'project.logging.SpecialFilter',
+            'foo': 'bar',
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['special']
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['null'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'myproject.custom': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+            'filters': ['special']
+        }
+    }
+}
+
+This logging configuration does the following things:
+
+    Identifies the configuration as being in ‘dictConfig version 1’ format. At present, this is the only dictConfig format version.
+
+    Disables all existing logging configurations.
+
+    Defines two formatters:
+
+        simple, that just outputs the log level name (e.g., DEBUG) and the log message.
+
+        The format string is a normal Python formatting string describing the details that are to be output on each logging line. The full list of detail that can be output can be found in the formatter documentation.
+
+        verbose, that outputs the log level name, the log message, plus the time, process, thread and module that generate the log message.
+
+    Defines one filter – project.logging.SpecialFilter, using the alias special. If this filter required additional arguments at time of construction, they can be provided as additional keys in the filter configuration dictionary. In this case, the argument foo will be given a value of bar when instantiating the SpecialFilter.
+
+    Defines three handlers:
+        null, a NullHandler, which will pass any DEBUG (or higher) message to /dev/null.
+        console, a StreamHandler, which will print any DEBUG (or higher) message to stderr. This handler uses the simple output format.
+        mail_admins, an AdminEmailHandler, which will email any ERROR (or higher) message to the site admins. This handler uses the special filter.
+
+    Configures three loggers:
+        django, which passes all messages at INFO or higher to the null handler.
+        django.request, which passes all ERROR messages to the mail_admins handler. In addition, this logger is marked to not propagate messages. This means that log messages written to django.request will not be handled by the django logger.
+        myproject.custom, which passes all messages at INFO or higher that also pass the special filter to two handlers – the console, and mail_admins. This means that all INFO level messages (or higher) will be printed to the console; ERROR and CRITICAL messages will also be output via email.
+
+
+Django provides 4 loggers by default 
+django :django is the catch-all logger. No messages are posted directly to this logger.
+django.request :Log messages related to the handling of requests. 5XX responses are raised as ERROR messages; 4XX responses are raised as WARNING messages.Messages to this logger have the following extra context:
+    *status_code: The HTTP response code associated with the request.
+    *request: The request object that generated the logging message
+django.db.backends:Messages relating to the interaction of code with the database. For example, every application-level SQL statement executed by a request is logged at the DEBUG level to this logger.
+Messages to this logger have the following extra context:
+   *duration: The time taken to execute the SQL statement.
+   *sql: The SQL statement that was executed.
+   *params: The parameters that were used in the SQL call.
+   
+django.security.* : The security loggers will receive messages on any occurrence of SuspiciousOperation. 
+
+
+Django provides one log handler in addition to those provided by the Python logging module.
+class AdminEmailHandler(include_html=False, email_backend=None)[source]
+lThis handler sends an email to the site admins for each log message it receives.
