@@ -1,0 +1,188 @@
+Tasty Pie
+For the purpose of this tutorial we will create a simple todo list application. Use manage.py to do so: 'python manage.py startapp todolist'. Add the app to the INSTALLED_APPS in settings.py. Let's now build some models:
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class TodoList(models.Model):
+name = models.CharField('List Title', max_length=200)
+author = models.ForeignKey(User, related_name='todo_lists')
+ 
+class TodoItem(models.Model):
+text = models.TextField('Item Text')
+todo_list = models.ForeignKey(TodoList, related_name='items')
+
+
+For the above models this is how we create te resources:
+Let's finally arrive to the TastyPie part. Create a file "api.py" inside todolist app, and let's create some REST resources:
+
+from tastypie.resources import ModelResource
+from .models import TodoList, TodoItem
+
+
+class TodoListResource(ModelResource):
+	class Meta:
+		queryset = TodoList.objects.all()
+		resource_name = 'list'
+
+
+class TodoItemResource(ModelResource):
+	class Meta:
+		queryset = TodoItem.objects.all()
+		resource_name = 'item'
+Now that we have the resources, we have to create an API and create an url pattern for it. Let's go to urls.py from the project folder:
+
+from django.conf.urls import patterns, include, url
+ 
+from django.contrib import admin
+admin.autodiscover()
+ 
+ 
+from tastypie.api import Api
+from todolist.api import TodoItemResource, TodoListResource
+ 
+v1_api = Api(api_name='v1')
+v1_api.register(TodoListResource())
+v1_api.register(TodoItemResource())
+ 
+urlpatterns = patterns('',
+# Examples:
+# url(r'^$', 'tptutorial.views.home', name='home'),
+# url(r'^blog/', include('blog.urls')),
+ 
+url(r'^admin/', include(admin.site.urls)),
+url(r'^api/', include(v1_api.urls)),
+)
+
+Use  authentication = SessionAuthentication() within the the resource Meta to get the django authentication activated.
+
+from tastypie.authorization import Authorization
+from tastypie.exceptions import Unauthorized
+
+Let's get into Authorization and create a file inside the app named "api_authorization.py
+class AuthorizationByUser(Authorization):
+
+    def read_list(self, object_list, bundle):
+        return object_list.filter(author=bundle.request.user)
+
+    def read_detail(self, object_list, bundle):
+        return bundle.obj.author == bundle.request.user
+
+    def create_list(self, object_list, bundle):
+        raise Unauthorized('Can\'t create lists')
+
+    def create_detail(self, object_list, bundle):
+        return Unauthorized('Can\'t create lists')
+
+    def update_list(self, object_list, bundle):
+        return Unauthorized('Can\'t update lists')
+
+    def update_detail(self, object_list, bundle):
+        return Unauthorized('Can\'t update lists')
+
+    def delete_list(self, object_list, bundle):
+        raise Unauthorized("Sorry, no deletes.")
+
+    def delete_detail(self, object_list, bundle):
+        raise Unauthorized("Sorry, no deletes.")
+
+Let's hook that authorization model with the resource:
+class TodoListResource(ModelResource):
+class Meta:
+authentication = SessionAuthentication()
+authorization = AuthorizationByUser()
+queryset = TodoList.objects.all()
+resource_name = 'list'
+
+
+
+**From the Basics again**
+
+Creating resources:
+from tastypie.resources import ModelResource
+from myapp.models import Entry
+
+
+class EntryResource(ModelResource):
+    class Meta:
+        queryset = Entry.objects.all()
+        resource_name = 'entry'
+
+
+
+Hookng up the rewources:
+# urls.py
+from django.conf.urls.defaults import *
+from myapp.api import EntryResource
+
+entry_resource = EntryResource()
+
+urlpatterns = patterns('',
+    # The normal jazz here...
+    (r'^blog/', include('myapp.urls')),
+    (r'^api/', include(entry_resource.urls)),
+)
+
+
+All below work
+
+http://127.0.0.1:8000/api/entry/?format=json
+http://127.0.0.1:8000/api/entry/1/?format=json
+http://127.0.0.1:8000/api/entry/schema/?format=json
+http://127.0.0.1:8000/api/entry/set/1;3/?format=json
+However, if you try sending a POST/PUT/DELETE to the resource, you find yourself getting “401 Unauthorized” errors. For safety, Tastypie ships with the authorization class  set to ReadOnlyAuthorization. This makes it safe to expose on the web, but prevents us from doing POST/PUT/DELETE. Let’s enable those:
+
+
+
+Adding additional resources:
+In order to handle our user relation, we’ll need to create a UserResource and tell the EntryResource to use it. So we’ll modify myapp/api.py to match the following code:
+
+# myapp/api.py
+from django.contrib.auth.models import User
+from tastypie import fields
+from tastypie.resources import ModelResource
+from myapp.models import Entry
+
+
+class UserResource(ModelResource):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'user'
+
+
+class EntryResource(ModelResource):
+    user = fields.ForeignKey(UserResource, 'user')	'''We simply created a new ModelResource subclass called UserResource. Then we added a field to EntryResource that specified that the user field points to a UserResource for that data'''
+
+    class Meta:
+        queryset = Entry.objects.all()
+        resource_name = 'entry'
+
+
+Tastypie ships with an Api class, which lets you bind multiple Resources together to form a coherent API. Adding it to the mix is simple.
+
+v1_api = Api(api_name='v1')
+v1_api.register(UserResource())
+v1_api.register(EntryResource())
+
+urlpatterns = patterns('',
+    # The normal jazz here...
+    (r'^blog/', include('myapp.urls')),
+    (r'^api/', include(v1_api.urls)),
+)
+
+
+Limiting Data and access by including excludes in MEta
+class UserResource(ModelResource):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'user'
+        excludes = ['email', 'password', 'is_active', 'is_staff', 'is_superuser']
+
+class UserResource(ModelResource):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'user'
+        excludes = ['email', 'password', 'is_active', 'is_staff', 'is_superuser']
+        allowed_methods = ['get']
+
+Now only HTTP GET requests will be allowed on /api/v1/user/ endpoints. If you require more granular control, both list_allowed_methods and detail_allowed_methods options are supported
