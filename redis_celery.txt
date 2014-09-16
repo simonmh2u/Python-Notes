@@ -312,3 +312,6 @@ producer --> Broker --> consumer -> workers --> result backend (except broker an
 Dont pass object instances to calery tasks.
 For concurrency use multiprocessnig
 profile stuff and break down tasks.
+
+
+

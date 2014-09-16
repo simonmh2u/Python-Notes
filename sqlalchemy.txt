@@ -608,3 +608,26 @@ The most succinct and accurate way to join() is to use the the relationship()-bo
 ...         filter(a2.email_address == 'jack@hotmail.com').\
 ...         all()
 
+
+import  func # THis has all the aggregate functions like count , min , max etc.
+
++------------------------------------------------------------------+
+| *** Eager Loading ***                                            |
++------------------------------------------------------------------+
+| the "N plus one" problem refers to the many SELECT statements    |
+| emitted when loading collections against a parent result 
+
+| *eager loading* solves this problem by loading *all* collections  |
+| at once.                                                          |
++------------------------------------------------------ (23 / 27) --+
+
+>>> session.rollback()  # so we can see the load happen again.
+>>> from sqlalchemy.orm import subqueryload
+>>> for user in session.query(User).options(subqueryload(User.addresses)):
+...     print(user, user.addresses)
+
++------------------------------------------------------------------+
+| eager loading *does not* change the *result* of the Query.       |
+| only how related collections are loaded.                         |
++----------------------------------------------------- (25 / 27) --+
+This reduces the number of qureries just to 2
