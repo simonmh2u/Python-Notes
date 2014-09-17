@@ -315,3 +315,202 @@ profile stuff and break down tasks.
 
 
 
+
+Let’s create the file tasks.py:
+
+from celery import Celery
+
+app = Celery('tasks', broker='amqp://guest@localhost//')
+
+@app.task
+def add(x, y):
+    return x + y
+
+The first argument to Celery is the name of the current module, this is needed so that names can be automatically generated, the second argument is the broker keyword argument which specifies the URL of the message broker you want to use, using RabbitMQ here,
+
+You now run the worker by executing our program with the worker argument
+$ celery -A tasks worker --loglevel=info
+In production you will want to run the worker in the background as a daemo
+
+To call our task you can use the delay() method.
+>>> from tasks import add
+>>> add.delay(4, 4)
+Calling a task returns an AsyncResult instance which can be used to check the state of the task, wait for the task to finish or get its return value 
+
+
+If you want to keep track of the tasks’ states, Celery needs to store or send the states somewhere.
+For this example you will use the amqp result backend, which sends states as messages. The backend is specified via the backend argument to Celery, (or via the CELERY_RESULT_BACKEND setting if you choose to use a configuration module):
+
+app = Celery('tasks', backend='amqp', broker='amqp://')
+
+The ready() method returns whether the task has finished processing or not:
+>>> result.ready()
+False
+
+You can wait for the result to complete, but this is rarely used since it turns the asynchronous call into a synchronous one:
+>>> result.get(timeout=1)
+
+If the task raised an exception you can also gain access to the original traceback:
+>>> result.traceback
+
+
+
+from celery import Celery
+
+app = Celery('proj',
+             broker='amqp://',
+             backend='amqp://',
+             include=['proj.tasks'])
+
+# Optional configuration, see the application user guide.
+app.conf.update(
+    CELERY_TASK_RESULT_EXPIRES=3600,)
+
+The include argument is a list of modules to import when the worker starts. You need to add our tasks module here so that the worker is able to find our tasks.
+The default concurrency number(workers) is the number of CPU’s on that machine (including cores), you can specify a custom number using -c option.
+
+
+– Events is an option that when enabled causes Celery to send monitoring messages (events) for actions occurring in the worker.
+
+– Queues is the list of queues that the worker will consume tasks from.
+
+Using multi to start workers:
+
+# Single worker with explicit name and events enabled.
+$ celery multi start Leslie -E
+
+# Pidfiles and logfiles are stored in the current directory
+# by default.  Use --pidfile and --logfile argument to change
+# this.  The abbreviation %N will be expanded to the current
+# node name.
+$ celery multi start Leslie -E --pidfile=/var/run/celery/%N.pid
+                                --logfile=/var/log/celery/%N.log
+
+
+# You need to add the same arguments when you restart,
+# as these are not persisted anywhere.
+$ celery multi restart Leslie -E --pidfile=/var/run/celery/%N.pid
+                                 --logfile=/var/run/celery/%N.log
+
+# To stop the node, you need to specify the same pidfile.
+$ celery multi stop Leslie --pidfile=/var/run/celery/%N.pid
+
+# 3 workers, with 3 processes each
+$ celery multi start 3 -c 3
+celery worker -n celery1@myhost -c 3
+celery worker -n celery2@myhost -c 3
+celery worker -n celery3@myhost -c 3
+
+# start 3 named workers
+$ celery multi start image video data -c 3
+celery worker -n image@myhost -c 3
+celery worker -n video@myhost -c 3
+celery worker -n data@myhost -c 3
+
+# specify custom hostname
+$ celery multi start 2 --hostname=worker.example.com -c 3
+celery worker -n celery1@worker.example.com -c 3
+celery worker -n celery2@worker.example.com -c 3
+
+# specify fully qualified nodenames
+$ celery multi start foo@worker.example.com bar@worker.example.com -c 3
+
+# Advanced example starting 10 workers in the background:
+#   * Three of the workers processes the images and video queue
+#   * Two of the workers processes the data queue with loglevel DEBUG
+#   * the rest processes the default' queue.
+$ celery multi start 10 -l INFO -Q:1-3 images,video -Q:4,5 data
+    -Q default -L:4,5 DEBUG
+
+# You can show the commands necessary to start the workers with
+# the 'show' command:
+$ celery multi show 10 -l INFO -Q:1-3 images,video -Q:4,5 data
+    -Q default -L:4,5 DEBUG
+
+# Additional options are added to each celery worker' comamnd,
+# but you can also modify the options for ranges of, or specific workers
+
+# 3 workers: Two with 3 processes, and one with 10 processes.
+$ celery multi start 3 -c 3 -c:1 10
+celery worker -n celery1@myhost -c 10
+celery worker -n celery2@myhost -c 3
+celery worker -n celery3@myhost -c 3
+
+# can also specify options for named workers
+$ celery multi start image video data -c 3 -c:image 10
+celery worker -n image@myhost -c 10
+celery worker -n video@myhost -c 3
+celery worker -n data@myhost -c 3
+
+# ranges and lists of workers in options is also allowed:
+# (-c:1-3 can also be written as -c:1,2,3)
+$ celery multi start 5 -c 3  -c:1-3 10
+celery worker -n celery1@myhost -c 10
+celery worker -n celery2@myhost -c 10
+celery worker -n celery3@myhost -c 10
+celery worker -n celery4@myhost -c 3
+celery worker -n celery5@myhost -c 3
+
+# lists also works with named workers
+$ celery multi start foo bar baz xuzzy -c 3 -c:foo,bar,baz 10
+celery worker -n foo@myhost -c 10
+celery worker -n bar@myhost -c 10
+celery worker -n baz@myhost -c 10
+celery worker -n xuzzy@myhost -c 3
+
+
+
+>>> add.delay(2, 2)
+
+This method is actually a star-argument shortcut to another method called apply_async():
+>>> add.apply_async((2, 2))
+The latter enables you to specify execution options like the time to run (countdown), the queue it should be sent to and so on:
+>>> add.apply_async((2, 2), queue='lopri', countdown=10)
+
+The delay and apply_async methods return an AsyncResult instance, which can be used to keep track of the tasks execution state
+
+*If you have a result backend configured you can retrieve the return value of a task:
+
+>>> res = add.delay(2, 2)
+>>> res.get(timeout=1)
+4
+You can find the task’s id by looking at the id attribute:
+>>> res.id
+d6b3aea2-fb9b-4ebc-8da4-848818db9114
+
+So how does it know if the task has failed or not? It can find out by looking at the tasks state:
+>>> res.state
+'FAILURE'
+
+A task can only be in a single state, but it can progress through several states. The stages of a typical task can be:
+PENDING -> STARTED -> SUCCESS
+
+
+The started state is a special state that is only recorded if the CELERY_TRACK_STARTED setting is enabled, or if the @task(track_started=True) option is set for the task.
+
+
+*Routing*
+The CELERY_ROUTES setting enables you to route tasks by name and keep everything centralized in one location:
+app.conf.update(
+    CELERY_ROUTES = {
+        'proj.tasks.add': {'queue': 'hipri'},
+    },
+)
+You can also specify the queue at runtime with the queue argument to apply_async:
+>>> from proj.tasks import add
+>>> add.apply_async((2, 2), queue='hipri')
+
+
+*You can then make a worker consume from this queue by specifying the -Q option:
+$ celery -A proj worker -Q hipri
+
+Use below to see wht this worker is curretly doing.
+*$ celery -A proj inspect active --destination=celery@example.com
+
+*For example you can force workers to enable event messages (used for monitoring tasks and workers):
+$ celery -A proj control enable_events
+When events are enabled you can then start the event dumper to see what the workers are doing:
+$ celery -A proj events --dump
+
+
+

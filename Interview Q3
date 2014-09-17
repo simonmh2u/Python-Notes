@@ -1,0 +1,250 @@
+Basic Python:
+=============
+- do they know a tuple/list/dict when they see it?
+
+- when to use list vs. tuple vs. dict. vs. set
+
+- can they use list comprehensions (and know when not to
+   abuse them? :)
+
+- can they use tuple unpacking for assignment?
+
+- string building...do they use "+=" or do they build a list
+   and use .join() to recombine them efficiently
+
+- truth-value testing questions and observations (do they
+   write "if x == True" or do they just write "if x")
+
+- basic file-processing (iterating over a file's lines)
+
+- basic understanding of exception handling
+
+Broader Basic Python:
+=====================
+- questions about the standard library ("do you know if
+   there's a standard library for doing X?", or "in which
+   library would you find [common functionality Y]?")  Most
+   of these are related to the more common libraries such as
+   os/os.path/sys/re/itertools
+
+- questions about iterators/generators
+
+- questions about map/reduce/sum/etc family of functions
+
+- questions about "special" methods (__<foo>__)
+
+More Advanced Python:
+=====================
+- can they manipulate functions as first-class objects
+   (Python makes it easy, but do they know how)
+
+- more detailed questions about the std. libraries (such as
+   datetime/email/csv/zipfile/networking/optparse/unittest)
+
+- questions about testing (unittests/doctests)
+
+- questions about docstrings vs. comments, and the "Why" of
+   them
+
+- more detailed questions about regular expressions
+
+- questions about mutability
+
+- keyword/list parameters and unpacked kwd args
+
+- questions about popular 3rd-party toolkits (BeautifulSoup,
+   pyparsing...mostly if they know about them and when to use
+   them, not so much about implementation details)
+
+- questions about monkey-patching
+
+- questions about PDB
+
+- questions about properties vs. getters/setters
+
+- questions about classmethods
+
+- questions about scope/name-resolution
+
+- use of lambda
+
+Python History:
+===============
+- decorators added in which version?
+
+- "batteries included" SQL-capible DB in which version?
+
+- the difference between "class Foo" and "class Foo(object)"
+
+- questions from "import this" about pythonic code
+
+Python Resources:
+=================
+- what do they know about various Python web frameworks
+   (knowing a few names is usually good enough, though
+   knowledge about the frameworks is a nice plus) such as
+   Django, TurboGears, Zope, etc.
+
+- what do they know about various Python GUI frameworks and
+   the pros/cons of them (tkinter, wx, pykde, etc)
+
+- where do they go with Python related questions (c.l.p,
+   google, google-groups, etc)
+
+Other Process-releated things:
+==============================
+- do they use revision control
+   (RCS/CVS/Subversion/Mercurial/Git...anything but VSS) and
+   know how to use it well
+
+- do they write automated tests for their code
+
+Touchy-feely things:
+====================
+- tabs vs. spaces, and their reasoning
+
+- reason for choosing Python
+
+- choice of editor/IDE
+
+
+
+easy/intermediate
+
+    What are Python decorators and how would you use them?
+    How would you setup many projects where each one uses different versions of Python and third party libraries?
+    What is PEP8 and do you follow its guidelines when you're coding?
+    How are arguments passed – by reference of by value? (easy, but not that easy, I'm not sure if I can answer this clearly)
+    Do you know what list and dict comprehensions are? Can you give an example?
+    Show me three different ways of fetching every third item in the list
+    Do you know what is the difference between lists and tuples? Can you give me an example for their usage?
+    Do you know the difference between range and xrange?
+    Tell me a few differences between Python 2.x and 3.x?
+    The with statement and its usage.
+    How to avoid cyclical imports without having to resort to imports in functions?
+    what's wrong with import all?
+    Why is the GIL important? (This actually puzzles me, don't know the answer)
+    What are "special" methods (<foo>), how they work, etc
+    can you manipulate functions as first-class objects?
+    the difference between "class Foo" and "class Foo(object)"
+
+tricky, smart ones
+
+    how to read a 8GB file in python?
+    what don't you like about Python?
+    can you convert ascii characters to an integer without using built in methods like string.atoi or int()? curious one
+
+subjective ones
+
+    do you use tabs or spaces, which ones are better?
+
+
+
+
+
+
+
+How are arguments passed – by reference of by value?
+The short answer is “neither”, actually it is called “call by object” or “call by sharing”(you can check here for more info). The longer one starts with the fact that this terminology is probably not the best one to describe how Python works. In Python everything is an object and all variables hold references to objects. The values of these references are to the functions. As result you can not change the value of the reference but you can modify the object if it is mutable. Remember numbers, strings and tuples are immutable, list and dicts are mutable.
+Do you know what list and dict comprehensions are? Can you give an example?
+List/Dict comprehensions are syntax constructions to ease the creation of a list/dict based on existing iterable. According to the 3rd edition of “Learning Python” list comprehensions are generally faster than normal loops but this is something that may change between releases. Examples:
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+   
+# simple iteration
+a = []
+for x in range(10):
+    a.append(x*2)
+# a == [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+ 
+# list comprehension
+a = [x*2 for x in range(10)]
+ 
+# dict comprehension
+a = {x: x*2 for x in range(10)}
+# a == {0: 0, 1: 2, 2: 4, 3: 6, 4: 8, 5: 10, 6: 12, 7: 14, 8: 16, 9: 18}
+What is PEP 8?
+PEP 8 is a coding convention(a set of recommendations) how to write your Python code in order to make it more readable and useful for those after you. For more information check PEP 8.
+Do you use virtual environments?
+I personally and most(by my observation) of the Python developers find the virtual environment tool extremely useful. Yeah, probably you can live without it but this will make the work and support of multiple projects that requires different package versions a living hell.
+Can you sum all of the elements in the list, how about to multuply them and get the result?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+   
+# the basic way
+s = 0
+for x in range(10):
+    s += x
+ 
+# the right way
+s = sum(range(10))
+ 
+ 
+# the basic way
+s = 1
+for x in range(1, 10):
+    s = s * x
+ 
+# the other way
+from operator import mul
+reduce(mul, range(1, 10))
+
+As for the last example, I know Guido van Rossum is not a fan of reduce, more info here, but still for some simple tasks reduce can come quite handy.
+Do you know what is the difference between lists and tuples? Can you give me an example for their usage?
+First list are mutable while tuples are not, and second tuples can be hashed e.g. to be used as keys for dictionaries. As an example of their usage, tuples are used when the order of the elements in the sequence matters e.g. a geographic coordinates, “list” of points in a path or route, or set of actions that should be executed in specific order. Don’t forget that you can use them a dictionary keys. For everything else use lists.
+Do you know the difference between range and xrange?
+Range returns a list while xrange returns a generator xrange object which takes the same memory no matter of the range size. In the first case you have all items already generated(this can take a lot of time and memory) while in the second you get the elements one by one e.g. only one element is generated and available per iteration. Simple example of generator usage can be find in the problem 2 of the “homework” for my presentation Functions in Python
+
+Tell me a few differences between Python 2.x and 3.x
+There are many answers here but for me some of the major changes in Python 3.x are: all strings are now Unicode, print is now function not a statement. There is no range, it has been replaced by xrange which is removed. All classes are new style and the division of integers now returns float.
+What are decorators and what is their usage?
+According to Bruce Eckel’s Introduction to Python Decorators “Decorators allow you to inject or modify code in functions or classes”. In other words decorators allow you to wrap a function or class method call and execute some code before or after the execution of the original code. And also you can nest them e.g. to use more than one decorator for a specific function. Usage examples include – logging the calls to specific method, checking for permission(s), checking and/or modifying the arguments passed to the method etc.
+The with statement and its usage.
+In a few words the with statement allows you to executed code before and/or after a specific set of operations. For example if you open a file for reading and parsing no matter what happens during the parsing you want to be sure that at the end the file is closed. This is normally achieved using the try… finally construction but the with statement simplifies it usin the so called “context management protocol”. To use it with your own objects you just have to define __enter__ and __exit__ methods. Some standard objects like the file object automatically support this protocol. For more information you may check Understanding Python’s “with” statement.
+- See more at: http://ilian.i-n-i.org/python-interview-question-and-answers/#sthash.Ii1vT8nM.dpuf
+
+
+
+    Talk to me about the GIL. How does it impact concurrency in Python? What kinds of applications does it impact more than others?
+    How does Python's garbage collection work?
+    What is the difference between range and xrange? How has this changed over time?
+    Here's a function. Optimize it for me.
+    How do you iterate over a list and pull element indices at the same time?
+    I'm getting a maximum recursion depth error for a function. What does this mean? How can I mitigate the problem?
+    How do you enforce ordering for a dictionary-style object?
+    How does Python's list.sort work at a high level? Is it stable? What's the runtime?
+    What's the difference between a list, dictionary, and array in Python?
+    What does this list comprehension do?
+    Here's a class hierarchy with some methods defined. When I call this function, what gets printed?
+    What is monkeypatching? How can you do it in Python?
+    What are some caveats to pickling? Marshaling?
+    How many ways can you append or concatenate strings? Which of these ways is fastest? Easiest to read?
+    Print me the full pathname of every file in this directory tree.
+    What's wrong with this function?
+    What's your preferred editor? (vim, of course - anything else and they fail.)

@@ -1,0 +1,57 @@
+What is used to represent strings in python.Is double quotes used for string representation or single quotes used for string representation in python?
+What is the method does join() in python belong to?
+How is memory managed in python?
+Like other programming language python also has garbage collector which will take care of memory management in python.
+Memory is managed through private heaps. Private heap is managed by python memory manager.
+Why python is not that much of populAR, when compared to other programming languages?
+Python is not so useful in web environment where the user interface is the browser. Hence, lot of people are using PHP for different design goals. Google is tightly connected with python as they make ...
+Phyton advantages and dis-advantages
+1 answer
+What are the advantage and dis-advantage of phyton programming language?
+Python is more like java and bit cumbersome, but it leads to a better design. Python is an interpreted language, high level programming, pure object-oriented, high performance server side scripting la...
+Does python support switch or case statement in python?If not what is the reason for the same?
+3 answers
+No. Python does not have any switch or case statement. But it provides other ways of achieving multiway branching such as if-elif statements and dictionaries. Example 1: (Using if-elif-else)if x ...
+You can use a dictionary to simulate the switch statement.def doSomething():    print "doSomething() called"def doSomethingElse():    print "doSomethingEls...
+Why can't lambda forms in python contain statements?
+2 answers
+They are syntactically restricted to a single expression.
+A lambda statement is used to create new function objects and then return them at runtime thats why  lambda forms in Python didn't contain statement.
+How is the implementation of python's dictionaries done?
+2 answers
+A hash value of the key is computed using a hash function, The hash value addresses a location in an array of "buckets" or "collision lists" which contains the (key , value) pa...
+Using curly brackets -> {}eg: {'a':'123', 'b':'456'}
+What is the optional statement used in a try ... Except statement in python?
+2 answers
+There are 2 optional clauses used in try...except statements: 1. else clause: It is useful for code that must be executed when the try block doesn't create any exception2. finally clause:Its is useful for code that must be executed irrespective of whether an exception is generated or not.
+Try ... except (...) ... [finally]
+What is list comprehensions feature of python used for?
+1 answer
+List comprehensions help to create and manage lists in a simpler and
+clearer way than using map(), filter() and lambda. Each list comprehension
+consists of an expression followed by a for clause, then zero or more for or
+if clauses.
+What is __slots__ and when is it useful?
+Normally, all class objects have an __dict__ which allows new attributes to be bound to a class instance at runtime. When a class is defined with __slots__, only attributes whose names are present in the __slots__ sequence are allowed. This results in instances of this class not having an __dict__...
+Answer Question
+What are all the operating system that python can run on?
+1 answer
+Python can run of every operating system like UNIX/LINUX, Mac, Windows and others.
+What are the disadvantages of the python programming language?
+1 answer
+One of the disadvantage of the Python programming language is it is not suited for fast and memory intensive tasks.
+Why isn't all memory freed when python exits?
+1 answer
+Objects referenced from the global namespaces of Python modules are not always deallocated when Python exits. This may happen if there are circular references. There are also certain bits of memory ...
+Does python support strongly for regular expressions? What are the other languages that support strongly for regular expressions?
+1 answer
+Yes python strongly support regular expression. Other languages supporting regular expressions are: Delphi, Java, Java script, .NET, Perl, Php, Posix, python, Ruby, Tcl, Visual Basic, XML schema, VB script, Visual Basic 6.
+Why was the language called as python?
+1 answer
+At the same time he began implementing Python, Guido van Rossum was also reading the published scripts from "Monty Python's Flying Circus" (a BBC comedy series from the seventies, in the...
+Does python support multiple inheritance?
+1 answer
+Yes it does support.
+What is the Java implementation of python popularly known as?
+1 answer
+Jython
