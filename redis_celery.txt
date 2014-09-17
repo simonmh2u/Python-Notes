@@ -513,4 +513,138 @@ When events are enabled you can then start the event dumper to see what the work
 $ celery -A proj events --dump
 
 
+There are several options you can set that will change how Celery works. These options can be set directly on the app instance, or you can use a dedicated configuration module.
+
+The configuration is available as app.conf:
+
+>>> app.conf.CELERY_TIMEZONE
+'Europe/London'
+
+app.config_from_object('celeryconfig')
+
+The celeryconfig module may then look like this:
+
+celeryconfig.py:
+CELERY_ENABLE_UTC = True
+CELERY_TIMEZONE = 'Europe/London'
+
+
+When a task is retried this is also recorded as a task state, so that you can track the progress of the task using the result instance (see States).
+
+Here’s an example using retry:
+
+@app.task(bind=True)
+def send_twitter_status(self, oauth, tweet):
+    try:
+        twitter = Twitter(oauth)
+        twitter.update_status(tweet)
+    except (Twitter.FailWhaleError, Twitter.LoginError) as exc:
+        raise self.retry(exc=exc)
+
+
+***STATES****
+PENDING
+
+Task is waiting for execution or unknown. Any task id that is not known is implied to be in the pending state.
+STARTED
+
+Task has been started. Not reported by default, to enable please see app.Task.track_started.
+metadata:   pid and hostname of the worker process executing the task.
+SUCCESS
+
+Task has been successfully executed.
+metadata:   result contains the return value of the task.
+propagates: Yes
+ready:  Yes
+FAILURE
+
+Task execution resulted in failure.
+metadata:   result contains the exception occurred, and traceback contains the backtrace of the stack at the point when the exception was raised.
+propagates: Yes
+RETRY
+
+Task is being retried.
+metadata:   result contains the exception that caused the retry, and traceback contains the backtrace of the stack at the point when the exceptions was raised.
+propagates: No
+REVOKED
+
+Task has been revoked.
+propagates: Yes
+
+*CALLING TASKS*
+
+
+
+Quick Cheat Sheet
+
+    T.delay(arg, kwarg=value)
+
+        always a shortcut to .apply_async.
+
+    T.apply_async((arg, ), {'kwarg': value})
+
+    T.apply_async(countdown=10)
+
+        executes 10 seconds from now.
+
+    T.apply_async(eta=now + timedelta(seconds=10))
+
+        executes 10 seconds from now, specifed using eta
+
+    T.apply_async(countdown=60, expires=120)
+
+        executes in one minute from now, but expires after 2 minutes.
+
+    T.apply_async(expires=now + timedelta(days=2))
+
+        expires in 2 days, set using datetime.
+
+
+
+Celery supports linking tasks together so that one task follows another. The callback task will be applied with the result of the parent task as a partial argument:
+add.apply_async((2, 2), link=add.s(16)
+Here the result of the first task (4) will be sent to a new task that adds 16 to the previous result, forming the expression
+
+ETA anc countdown
+>>> result = add.apply_async((2, 2), countdown=3)
+>>> result.get()    # this takes at least 3 seconds to return
+
+Expiry
+The expires argument defines an optional expiry time, either as seconds after task publish, or a specific date and time using datetime:
+>>> # Task expires after one minute from now.
+>>> add.apply_async((10, 10), expires=60)
+
+Retries:
+Celery will automatically retry sending messages in the event of connection failure, and retry behavior can be configured – like how often to retry, or a maximum number of retries – or disabled all together.
+
+To disable retry you can set the retry execution option to False:
+
+add.apply_async((2, 2), retry=False)
+
+Serialization:
+Data transferred between clients and workers needs to be serialized, so every message in Celery has a content_type header that describes the serialization method used to encode it.
+Example setting a custom serializer for a single task invocation:
+>>> add.apply_async((10, 10), serializer='json')
+
+
+Compression:
+Example specifying the compression used when calling a task:
+>>> add.apply_async((2, 2), compression='zlib'
+
+
+
+Canvas:
+A signature() wraps the arguments, keyword arguments, and execution options of a single task invocation in a way such that it can be passed to functions or even serialized and sent across the wir
+Signatures are often nicknamed “subtasks” because they describe a task to be called within a task.
+
+Method1
+>>> signature('tasks.add', args=(2, 2), countdown=10)
+tasks.add(2, 2)
+Method2
+>>> add.subtask((2, 2), countdown=10)
+tasks.add(2, 2)
+Method3
+There is also a shortcut using star arguments:
+>>> add.s(2, 2)
+tasks.add(2, 2
 
