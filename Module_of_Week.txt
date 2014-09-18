@@ -55,18 +55,6 @@ In [88]: for i in range(1,20):
  Queue.LifoQueue is the stack implementation.
 Queue provides   q.task_done() method supposed to be called after get to notify other threads that processing is done for last get.
 
-**Collections : Deque, namedtuple,ordereddict,defaultdict,Counter
-*Deque is a double ended  queue with methods like pop,popleft,append,appendleft,extend,extendleft , rotate,rotateleft. Important application undo/redo functionality in applications.
-*defaultdict is used to assign and add key value pairs into dict when accessed and key not present in the dict. for ex: d = defaultdict(int); d = {'s1':1} ; accessing d['s2'] adds 0 as value in the dict. We can even have custom methods just like int is being used here.
-*A Counter is a container that keeps track of how many times equivalent values are added. 
-c = collections.Counter('extremely')
-In [4]: c
-Out[4]: Counter({'e': 3, 'm': 1, 'l': 1, 'r': 1, 't': 1, 'y': 1, 'x': 1})
-*An OrderedDict is a dictionary subclass that remembers the order in which its contents are added.
-*namedtuple instances are just as memory efficient as regular tuples because they  do not have per-instance dictionaries. 
-In [5]: p = collections.namedtuple('p','name age')
-In [6]: p1 = p('simon',30)
-
 
 
 *The tempfile module provides several functions for creating filesystem resources  ecurely. TemporaryFile() opens and returns an un-named file,  NamedTemporaryFile()  , t1 = tempfile.NamedTemporaryFile()
@@ -637,3 +625,149 @@ $ python -m trace --coverdir coverdir1 --report --summary --missing --file cover
 is run when execution flow enters the code block inside the with. It returns an object to be used within the context.
 When execution flow leaves the with block, the __exit__() method of the context manager is called to clean up
 any resources being used
+
+
+
+
+
+**Collections : Deque, namedtuple,ordereddict,defaultdict,Counter
+*Deque is a double ended  queue with methods like pop,popleft,append,appendleft,extend,extendleft , rotate,rotateleft.
+ Important application undo/redo functionality in applications.
+
+*defaultdict is used to assign and add key value pairs into dict when accessed and key not present in the dict. for ex: d = defaultdict(int); d = {'s1':1} ; accessing d['s2'] adds 0 as value in the dict. We can even have custom methods just like int is being used here.
+
+
+*A Counter is a container that keeps track of how many times equivalent values are added. 
+c = collections.Counter('extremely')
+In [4]: c
+Out[4]: Counter({'e': 3, 'm': 1, 'l': 1, 'r': 1, 't': 1, 'y': 1, 'x': 1})
+you can update as well and the count gets added:c.update('dsdhsaa')
+The c.elements() method returns an iterator that produces all of the items known to the Counter.
+In [10]: c.most_common(1)
+Out[10]: [('s', 9)]
+Couner provides set operations as well.
+
+*An OrderedDict is a dictionary subclass that remembers the order in which its contents are added.
+
+*namedtuple instances are just as memory efficient as regular tuples because they  do not have per-instance dictionaries. 
+In [5]: p = collections.namedtuple('p','name age')
+In [6]: p1 = p('simon',30)
+
+*sched
+The sched module implements a generic event scheduler for running tasks at specific times. The scheduler class uses
+a time function to learn the current time, and a delay function to wait for a specific period of time. The actual units of
+time are not important, which makes the interface flexible enough to be used for many purposes.
+
+
+*calendar
+In [78]: print calendar.TextCalendar(calendar.SUNDAY).formatyear(2007)
+Pritns the whole year calendar similar to cal command
+
+*copy
+
+The shallow copy created by copy() is a new container populated with references to the contents of the original object.
+For example, a new list is constructed and the elements of the original list are appended to it.
+
+The deep copy created by deepcopy() is a new container populated with copies of the contents of the original object.
+For example, a new list is constructed and the elements of the original list are copied, then the copies are appended to
+the new list.
+
+
+
+*itertools purpose The itertools module includes a set of functions for working with iterable (sequence-like) data
+sets.
+The chain() function takes several iterators as arguments and returns a single iterator that produces the contents of
+all of them as though they came from a single sequence.
+from itertools import *
+for i in chain([1, 2, 3], [’a’, ’b’, ’c’]):
+
+izip() returns an iterator that combines the elements of several iterators into tuples. It works like the built-in
+function zip(), except that it returns an iterator instead of a list.
+from itertools import *
+for i in izip([1, 2, 3], [’a’, ’b’, ’c’]):
+print i
+$ python itertools_izip.py
+(1, ’a’)
+(2, ’b’)
+(3, ’c’
+
+
+The islice() function returns an iterator which returns selected items from the input iterator, by index. It takes the
+same arguments as the slice operator for lists: start, stop, and step. The start and step arguments are optional.
+In [53]: for i in islice(range(10),5,7):
+   ....:     print i 
+   ....:     
+5
+6
+
+
+The imap() function returns an iterator that calls a function on the values in the input iterators, and returns the results.
+It works like the built-in map(), except that it stops when any input iterator is exhausted (instead of inserting None
+values to completely consume all of the inputs).
+for i in imap(lambda x:2*x, xrange(5)):
+the lambda function multiplies 2 arguments, taken from separate iterators, and returns a tuple with the original arguments and the computed
+value.
+for i in imap(lambda x,y:(x, y, x*y), xrange(5), xrange(5,10)):
+print ’%d * %d = %d’ % i
+
+
+The starmap() function is similar to imap(), but instead of constructing a tuple from multiple iterators it splits
+up the items in a single iterator as arguments to the mapping function using the * syntax. Where the mapping function
+to imap() is called f(i1, i2), the mapping function to starmap() is called f(*i).
+from itertools import *
+values = [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)]
+for i in starmap(lambda x,y:(x, y, x*y), values):
+print ’%d * %d = %d’ % i
+
+
+
+The cycle() function returns an iterator that repeats the contents of the arguments it is given indefinitely. Since it
+has to remember the entire contents of the input iterator, it may consume quite a bit of memory if the iterator is long.
+In this example, a counter variable is used to break out of the loop after a few cycles.
+from itertools import *
+i = 0
+for item in cycle([’a’, ’b’, ’c’]):
+i += 1
+if i == 10:
+break
+
+
+The repeat() function returns an iterator that produces the same value each time it is accessed. It keeps going
+forever, unless the optional times argument is provided to limit it.
+from itertools import *
+for i in repeat(’over-and-over’, 5):
+print i
+
+
+The dropwhile() function returns an iterator that returns elements of the input iterator after a condition becomes
+false for the first time
+The opposite of dropwhile(), takewhile() returns an iterator that returns items from the input iterator as long
+as the test function returns true.
+
+
+ifilter() returns an iterator that works like the built-in filter() does for lists, including only items for which
+the test function returns true. It is different from dropwhile() in that every item is tested before it is returned.
+
+
+Sorting by Key, key should be a function which returns an element whcih can eb used as key for sorting.
+d = dict(a=1, b=2, c=1, d=2, e=1, f=2, g=3)
+di = sorted(d.iteritems(), key=itemgetter(1))
+
+
+The groupby() function returns an iterator that produces sets of values grouped by a common key.
+This example from the standard library documentation shows how to group keys in a dictionary which have the same
+value:
+from operator import itemgetter
+d = dict(a=1, b=2, c=1, d=2, e=1, f=2, g=3)
+di = sorted(d.iteritems(), key=itemgetter(1))
+for k, g in groupby(di, key=itemgetter(1)):
+print k, map(itemgetter(0), g)
+$ python itertools_groupby.py
+1 [’a’, ’c’, ’e’]
+2 [’b’, ’d’, ’f’]
+3 [’g’
+
+
+
+**Fabric**
+

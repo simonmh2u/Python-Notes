@@ -648,3 +648,176 @@ There is also a shortcut using star arguments:
 >>> add.s(2, 2)
 tasks.add(2, 2
 
+It supports the “Calling API” which means it supports delay and apply_async or being called directly.
+>>> add.apply_async((2, 2), countdown=1)
+>>> add.subtask((2, 2), countdown=1).apply_async()
+
+Partials
+
+With a signature, you can execute the task in a worker:
+>>> add.s(2, 2).delay()
+>>> add.s(2, 2).apply_async(countdown=1)
+
+Any arguments added will be prepended to the args in the signature:
+>>> partial = add.s(2)          # incomplete signature
+>>> partial.delay(4)            # 2 + 4
+
+or
+Any options added will be merged with the options in the signature, with the new options taking precedence:
+>>> s = add.subtask((2, 2), countdown=10)
+>>> s.apply_async(countdown=1)  # countdown is now 1
+
+
+Immutability
+Partials are meant to be used with callbacks, any tasks linked or chord callbacks will be applied with the result of the parent task. Sometimes you want to specify a callback that does not take additional arguments, and in that case you can set the signature to be immutable:
+>>> add.apply_async((2, 2), link=reset_buffers.subtask(immutable=True))
+
+Callback
+Callbacks can be added to any task using the link argument to apply_async:
+add.apply_async((2, 2), link=other_task.s())
+The callback will only be applied if the task exited successfully, and it will be applied with the return value of the parent task as argument.
+
+Chains:
+
+
+Here’s a simple chain, the first task executes passing its return value to the next task in the chain, and so on.
+>>> from celery import chain
+# 2 + 2 + 4 + 8
+>>> res = chain(add.s(2, 2), add.s(4), add.s(8))()
+>>> res.get()
+16
+This can also be written using pipes:
+>>> (add.s(2, 2) | add.s(4) | add.s(8))().get()
+16
+
+
+Immutabel sgnatures
+
+Signatures can be partial so arguments can be added to the existing arguments, but you may not always want that, for example if you don’t want the result of the previous task in a chain.
+In that case you can mark the signature as immutable, so that the arguments cannot be changed:
+>>> add.subtask((2, 2), immutable=True)
+There’s also an .si shortcut for this:
+>>> add.si(2, 2)
+Now you can create a chain of independent tasks instead:
+>>> res = (add.si(2, 2) | add.si(4, 4) | add.s(8, 8))()
+>>> res.get()
+16
+>>> res.parent.get()
+8
+>>> res.parent.parent.get()
+    4
+
+
+Simple group
+    You can easily create a group of tasks to execute in parallel:
+
+    >>> from celery import group
+    >>> res = group(add.s(i, i) for i in xrange(10))()
+    >>> res.get(timeout=1)
+    [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+
+Simple Chords
+The chord primitive enables us to add callback to be called when all of the tasks in a group have finished executing, which is often required for algorithms that aren’t embarrassingly parallel:
+
+>>> from celery import chord
+>>> res = chord((add.s(i, i) for i in xrange(10)), xsum.s())()
+>>> res.get()
+90
+From 3.1 errors will propagate to the callback, so the callback will not be executed instead the callback changes to failure state, and the error is set to the ChordError exception:
+
+
+Chunks
+
+Chunking lets you divide an iterable of work into pieces, so that if you have one million objects, you can create 10 tasks with hundred thousand objects each.
+
+
+
+
+***WORKERS***
+
+The broadcast() function.
+
+This is the client function used to send commands to the workers. Some remote control commands also have higher-level interfaces using broadcast() in the background, like rate_limit() and ping().
+
+Sending the rate_limit command and keyword arguments:
+
+>>> app.control.broadcast('rate_limit',
+...                          arguments={'task_name': 'myapp.mytask',
+...                                     'rate_limit': '200/m'})
+
+Changing rate-limits at runtime
+Example changing the rate limit for the myapp.mytask task to execute at most 200 tasks of that type every minute:
+>>> app.control.rate_limit('myapp.mytask', '200/m')
+
+
+
+revoking:
+app.control.revoke('d9078da5-9915-40a0-bfa1-392c7bde42ed')
+>>> app.control.revoke([
+...    '7993b0aa-1f0b-4780-9af0-c47c0858b3f2',
+...    'f565793e-b041-4b2b-9ca4-dca22762a55d',
+...    'd9d35e03-2997-42d0-a13e-64a66b88a618',
+])
+
+
+The time limit (–time-limit) is the maximum number of seconds a task may run before the process executing it is terminated and replaced by a new process. 
+>>> app.control.time_limit('tasks.crawl_the_web',
+                           soft=60, hard=120, reply=True)
+[{'worker1.example.com': {'ok': 'time limits set successfully'}}]
+
+OR
+>>> app.control.rate_limit('myapp.mytask', '200/m',
+...            destination=['celery@worker1.example.com'])
+
+You can specify what queues to consume from at startup, by giving a comma separated list of queues to the -Q option:
+
+$ celery -A proj worker -l info -Q foo,bar,baz
+
+Dynamically u can control the worker cosumption using
+>>> app.control.add_consumer(
+...     queue='baz',
+...     exchange='ex',
+...     exchange_type='topic',
+...     routing_key='media.*',
+...     options={
+...         'queue_durable': False,
+...         'exchange_durable': False,
+...     },
+...     reply=True,
+...     destination=['w1@example.com', 'w2@example.com'])
+
+
+Below gives stats
+celery -A proj inspect stats
+
+
+
+
+
+**ROUTING***
+With this setting on, a named queue that is not already defined in CELERY_QUEUES will be created automatically. This makes it easy to perform simple routing tasks.
+
+Say you have two servers, x, and y that handles regular tasks, and one server z, that only handles feed related tasks. You can use this configuration:
+
+CELERY_ROUTES = {'feed.tasks.import_feed': {'queue': 'feeds'}}
+
+Creating Queues in Celery:
+
+
+In Celery available queues are defined by the CELERY_QUEUES setting.
+
+Here’s an example queue configuration with three queues; One for video, one for images and one default queue for everything else:
+
+default_exchange = Exchange('default', type='direct')
+media_exchange = Exchange('media', type='direct')
+
+CELERY_QUEUES = (
+    Queue('default', default_exchange, routing_key='default'),
+    Queue('videos', media_exchange, routing_key='media.video'),
+    Queue('images', media_exchange, routing_key='media.image')
+)
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_DEFAULT_EXCHANGE = 'default'
+CELERY_DEFAULT_ROUTING_KEY = 'default'
+
+
