@@ -1,0 +1,142 @@
+Non Relational datastore for JSON docs.
+Its Schemaless.
+
+db.help() gives all commands.
+db.stats() provides various stats
+
+Creating and Finding Docs
+> db.things.save({a:1,b:2,c:3})
+> db.things.find()
+{ "_id" : ObjectId("541aecb39231b8f7823214ed"), "a" : 1, "b" : 2, "c" : 3 }
+> db.things.save({a:1,b:2,c:3,d:100})
+> db.things.find()
+> db.things.find({d:100})
+{ "_id" : ObjectId("541aecc89231b8f7823214ee"), "a" : 1, "b" : 2, "c" : 3, "d" : 100 }
+>
+
+Subdocuments:
+> db.things.save({a:1,fruits:['apple','baan']})
+> db.things.save()
+> db.things.find()
+{ "_id" : ObjectId("541aecb39231b8f7823214ed"), "a" : 1, "b" : 2, "c" : 3 }
+{ "_id" : ObjectId("541aecc89231b8f7823214ee"), "a" : 1, "b" : 2, "c" : 3, "d" : 100 }
+{ "_id" : ObjectId("541aee1adadcbf2334b38e5e"), "a" : 1, "fruits" : [  "apple",  "baan" ] }
+> db.things.save({name:'Simon',address:{street:'Indal',pin:590010}})
+> db.things.find()
+{ "_id" : ObjectId("541aecb39231b8f7823214ed"), "a" : 1, "b" : 2, "c" : 3 }
+{ "_id" : ObjectId("541aecc89231b8f7823214ee"), "a" : 1, "b" : 2, "c" : 3, "d" : 100 }
+{ "_id" : ObjectId("541aee1adadcbf2334b38e5e"), "a" : 1, "fruits" : [  "apple",  "baan" ] }
+{ "_id" : ObjectId("541aee5cdadcbf2334b38e5f"), "name" : "Simon", "address" : { "street" : "Indal", "pin" : 590010 } }
+>
+
+Prettify:
+> db.things.find().pretty()
+{ "_id" : ObjectId("541aecb39231b8f7823214ed"), "a" : 1, "b" : 2, "c" : 3 }
+{
+	"_id" : ObjectId("541aecc89231b8f7823214ee"),
+	"a" : 1,
+	"b" : 2,
+	"c" : 3,
+	"d" : 100
+}
+{
+	"_id" : ObjectId("541aee1adadcbf2334b38e5e"),
+	"a" : 1,
+	"fruits" : [
+		"apple",
+		"baan"
+	]
+}
+{
+	"_id" : ObjectId("541aee5cdadcbf2334b38e5f"),
+	"name" : "Simon",
+	"address" : {
+		"street" : "Indal",
+		"pin" : 590010
+	}
+}
+
+
+
+Sample Program:
+
+import pymongo
+
+from pymongo import Connection
+conn = Connection('localhost',27017)
+db = conn.test
+things = db.things
+item = things.find()
+for i in item:
+	try:
+		print i['a']
+	except KeyError:
+		pass	
+
+
+
+> j = db.things.findOne({fruits:'apple'})
+{
+	"_id" : ObjectId("541aee1adadcbf2334b38e5e"),
+	"a" : 1,
+	"fruits" : [
+		"apple",
+		"baan"
+	]
+}
+> j
+{
+	"_id" : ObjectId("541aee1adadcbf2334b38e5e"),
+	"a" : 1,
+	"fruits" : [
+		"apple",
+		"baan"
+	]
+}
+> j.b=2
+2
+
+
+ db.things.find()
+{ "_id" : ObjectId("541aecb39231b8f7823214ed"), "a" : 1, "b" : 2, "c" : 3 }
+{ "_id" : ObjectId("541aecc89231b8f7823214ee"), "a" : 1, "b" : 2, "c" : 3, "d" : 100 }
+{ "_id" : ObjectId("541aee5cdadcbf2334b38e5f"), "name" : "Simon", "address" : { "street" : "Indal", "pin" : 590010 } }
+{ "_id" : ObjectId("541aee1adadcbf2334b38e5e"), "a" : 1, "fruits" : [  "apple",  "baan" ], "b" : 2 }
+
+
+
+From within pymongo db.test.insert({}) used to insert data.
+
+Mongo dump and mongo restore used to load and dump data in bulk.
+mongorestore command used to restore.
+
+
+CRUD Operations:
+
+Insert:
+> doc = {name:"Simon",lname:"Hanchinamani",profession:"Hacker"}
+{ "name" : "Simon", "lname" : "Hanchinamani", "profession" : "Hacker" }
+> db.people.insert(doc)
+> db.people.find()
+{ "_id" : ObjectId("541f215a2e045cee43b63854"), "name" : "Simon", "lname" : "Hanchinamani", "profession" : "Hacker" }
+
+
+Find One and Find
+> db.people.findOne({lname:"Hanchinamani"})
+First arg simulates the where clause and Second arguement controls the attributes returned from the collections
+> db.people.findOne({lname:"Hanchinamani"},{name:true,_id:false})
+{ "name" : "Simon" }
+
+> db.scores.find({student:1,type:'essay'},{scores:true})
+{ "_id" : ObjectId("52fbc7f1165d12ae4e62d1fa"), "scores" : 72 }
+
+GT, LT etc.
+> db.scores.find({student:{$lt:3},type:'essay'})
+{ "_id" : ObjectId("52fbc7f1165d12ae4e62d1f7"), "student" : 0, "type" : "essay", "scores" : 46 }
+{ "_id" : ObjectId("52fbc7f1165d12ae4e62d1fa"), "student" : 1, "type" : "essay", "scores" : 72 }
+{ "_id" : ObjectId("52fbc7f1165d12ae4e62d1fd"), "student" : 2, "type" : "essay", "scores" : 32 }
+
+> db.scores.find({student:{$lt:3,$gte:1},type:'essay'})
+{ "_id" : ObjectId("52fbc7f1165d12ae4e62d1fa"), "student" : 1, "type" : "essay", "scores" : 72 }
+{ "_id" : ObjectId("52fbc7f1165d12ae4e62d1fd"), "student" : 2, "type" : "essay", "scores" : 32 }
+

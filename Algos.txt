@@ -20,3 +20,11 @@ def deque():
     while len(s1)!=0:
         s2.append(s1.pop())
     return s2.pop()
+
+
+Fibonacci sequence
+def fib(n):
+    x,y=0,1
+    for i in range(n):
+        yield x
+        x,y=y,x+y
