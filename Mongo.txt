@@ -110,6 +110,22 @@ From within pymongo db.test.insert({}) used to insert data.
 Mongo dump and mongo restore used to load and dump data in bulk.
 mongorestore command used to restore.
 
+Drop:
+> use test_database
+switched to db test_database
+> db.dropDatabase()
+{ "dropped" : "test_database", "ok" : 1 }
+
+Create Collection:
+>db.createCollection("mycol", { capped : true, autoIndexID : true, size : 6142800, max : 10000 } )
+{ "ok" : 1 
+
+cap the collection at <<size>> bytes or max 10000 docs
+
+
+Drop Collections:
+>db.mycollection.drop()
+
 
 CRUD Operations:
 
@@ -119,6 +135,11 @@ Insert:
 > db.people.insert(doc)
 > db.people.find()
 { "_id" : ObjectId("541f215a2e045cee43b63854"), "name" : "Simon", "lname" : "Hanchinamani", "profession" : "Hacker" }
+_id is 12 bytes hexadecimal number unique for every document in a collection. 12 bytes are divided as follows:
+_id: ObjectId(4 bytes timestamp, 3 bytes machine id, 2 bytes process id, 3 bytes incrementer
+
+To insert the document you can use db.post.save(document) also. If you don't specify _id in the document then save() method will work same as insert() method. If you specify _id then it will replace whole data of document containing _id as specified in save() method.
+
 
 
 Find One and Find
@@ -139,4 +160,135 @@ GT, LT etc.
 > db.scores.find({student:{$lt:3,$gte:1},type:'essay'})
 { "_id" : ObjectId("52fbc7f1165d12ae4e62d1fa"), "student" : 1, "type" : "essay", "scores" : 72 }
 { "_id" : ObjectId("52fbc7f1165d12ae4e62d1fd"), "student" : 2, "type" : "essay", "scores" : 32 }
+
+
+AND :
+db.mycol.find({"by":"tutorials point","title": "MongoDB Overview"})
+
+OR:
+db.mycol.find({$or:[{"by":"tutorials point"},{"title": "MongoDB Overview"}]}
+
+*Update:
+MongoDB's update() and save() methods are used to update document into a collection. The update() method update values in the existing document while the save() method replaces the existing document with the document passed in save() method.
+
+>db.mycol.update({'title':'MongoDB Overview'},{$set:{'title':'New MongoDB Tutorial'}})
+
+By default mongodb will update only single document, to update multiple you need to set a paramter 'multi' to true.
+>db.mycol.update({'title':'MongoDB Overview'},{$set:{'title':'New MongoDB Tutorial'}},{multi:true})
+
+*Remove:
+>db.mycol.remove({'title':'MongoDB Overview'})
+
+If you don't specify deletion criteria, then mongodb will delete whole documents from the collection. This is equivalent of SQL's truncate command.
+>db.mycol.remove()
+
+*LIMIT and SKIP*
+Following example will display only 2 documents while quering the document.
+> db.people.find({},{name:1,_id:0}).limit(3)
+{ "name" : "Simon" }
+{ "name" : "Pree1" }
+{ "name" : "Alice" }
+> db.people.find({},{name:1,_id:0}).limit(3).skip(1)
+{ "name" : "Pree1" }
+{ "name" : "Alice" }
+{ "name" : "Bob" }
+
+*SORT*
+Following example will display the documents sorted by title in descending order.
+
+>db.mycol.find({},{"title":1,_id:0}).sort({"title":-1})
+{"title":"Tutorials Point Overview"}
+{"title":"NoSQL Overview"}
+{"title":"MongoDB Overview"}
+
+
+*INDEX*
+>db.mycol.ensureIndex({"title":1})
+In ensureIndex() method you can pass multiple fields, to create index on multiple fields.
+>db.mycol.ensureIndex({"title":1,"description":-1})
+
+few Options for ensureIndex
+unique	: Boolean	Creates a unique index so that the collection will not accept insertion of documents where the index key or keys match an existing value in the index. Specify true to create a unique index. The default value is false.
+
+sparse	: Boolean	If true, the index only references documents with the specified field. These indexes use less space but behave differently in some situations (particularly sorts). The default value is false.
+
+
+
+
+*Agregation*
+
+**TODO**
+
+
+
+Replica Set:
+How replication works in MongoDB
+MongoDB achieves replication by the use of replica set. A replica set is a group of mongod instances that host the same data set. In a replica one node is primary node that receives all write operations. All other instances, secondaries, apply operations from the primary so that they have the same data set. Replica set can have only one primary node
+At the time of automatic failover or maintenance, election establishes for primary and a new primary node is elected.
+After the recovery of failed node, it again join the replica set and works as a secondary node.
+
+Starting a replica set:
+mongod --port "PORT" --dbpath "YOUR_DB_DATA_PATH" --replSet "REPLICA_SET_INSTANCE_NAME"
+mongod --port 27017 --dbpath "D:\set up\mongodb\data" --replSet rs0
+
+It will start a mongod instance with the name rs0, on port 27017. Now start the command prompt and connect to this mongod instance. In mongo client issue the command rs.initiate() to initiate a new replica set. To check the replica set configuration issue the command rs.conf(). To check the status of replica sete issue the command rs.status().
+Basic syntax of rs.add() command is as follows:
+>rs.add(HOST_NAME:PORT)
+
+
+*DUMPING and RESTORING*
+mongodump --host HOST_NAME --port PORT_NUMBER	This commmand will backup all databases of specified mongod instance.	mongodump --host tutorialspoint.com --port 27017
+mongodump --dbpath DB_PATH --out BACKUP_DIRECTORY		mongodump --dbpath /data/db/ --out /data/backup/
+mongodump --collection COLLECTION --db DB_NAME	This command will backup only specified collection of specified database.	mongodump --collection mycol --db test
+
+Basic syntax of mongorestore command is
+mongorestore
+
+Stats:
+mongostat
+This command checks the status of all running mongod instances and return counters of database operations. These counters include inserts, queries, updates, deletes, and cursors. Command also shows when you’re hitting page faults, and showcase your lock percentage.This means that you're running low on memory, hitting write capacity or have some performance issue.
+
+mongotop
+This command track and report the read and write activity of MongoDB instance on a collection basis. By default mongotop returns information in each second, by you can change it accordingly. You should check that this read and write activity matches your application intention, and you’re not firing too many writes to the database at a time, reading too frequently from disk, or are exceeding your working set size
+
+
+*Relationships*
+*Modeling Embedded Relationships*
+In the embedded approach, we will embed the address document inside the user document.
+
+{
+   "_id":ObjectId("52ffc33cd85242f436000001"),
+   "contact": "987654321",
+   "dob": "01-01-1991",
+   "name": "Tom Benzamin",
+   "address": [
+      {
+         "building": "22 A, Indiana Apt",
+         "pincode": 123456,
+         "city": "Los Angeles",
+         "state": "California"
+      },
+      {
+         "building": "170 A, Acropolis Apt",
+         "pincode": 456789,
+         "city": "Chicago",
+         "state": "Illinois"
+      }]
+} 
+db.users.findOne({"name":"Tom Benzamin"},{"address":1}) # THis gives the address
+
+
+*Modeling Referenced Relationships*
+{
+   "_id":ObjectId("52ffc33cd85242f436000001"),
+   "contact": "987654321",
+   "dob": "01-01-1991",
+   "name": "Tom Benzamin",
+   "address_ids": [
+      ObjectId("52ffc4a5d85242602e000000"),
+      ObjectId("52ffc4a5d85242602e000001")
+   ]
+}
+var result = db.users.findOne({"name":"Tom Benzamin"},{"address_ids":1})
+var addresses = db.address.find({"_id":{"$in":result["address_ids"]}})
 
