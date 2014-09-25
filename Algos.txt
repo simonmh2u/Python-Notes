@@ -1,4 +1,4 @@
-Prime Numbers:
+#Prime Numbers:
 In [18]: def isprime(n):
     for i in range(2,n):
         if n%i == 0:
@@ -10,7 +10,7 @@ In [19]: filter(isprime,range(50))
 Out[19]: [0, 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
 
 
-Using 2 Stacks and simulating a Queue
+#Using 2 Stacks and simulating a Queue
 def enque(k):
     while len(s2) !=0:
         s1.append(s2.pop())
@@ -20,3 +20,30 @@ def deque():
     while len(s1)!=0:
         s2.append(s1.pop())
     return s2.pop()
+
+
+#Implement a  Fifo:
+In [39]: class fifi(object):
+   ....:     def __init__(self):
+   ....:         self.cont=[]
+   ....:     def poper(self):
+   ....:         self.cont.reverse()
+   ....:         r = self.cont.pop()
+   ....:         self.cont.reverse()
+   ....:         return r
+   ....:     def pusher(self,var):
+   ....:         self.cont.append(var)
+   ....:     def prn(self):
+   ....:         print self.cont
+
+
+#Find substr within a string
+def substr(s1,s2):
+    for i in range(len(s2)):
+      if s2[i:i+len(s1)] == s1:
+            return True
+        else:
+            continue
+    return False
+
+
