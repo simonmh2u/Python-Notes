@@ -47,3 +47,9 @@ def substr(s1,s2):
     return False
 
 
+Fibonacci sequence
+def fib(n):
+    x,y=0,1
+    for i in range(n):
+        yield x
+        x,y=y,x+y
