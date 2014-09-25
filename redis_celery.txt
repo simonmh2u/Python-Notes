@@ -821,3 +821,40 @@ CELERY_DEFAULT_EXCHANGE = 'default'
 CELERY_DEFAULT_ROUTING_KEY = 'default'
 
 
+
+
+
+*********RABBIT MQ **************
+
+In RabbitMQ a message can never be sent directly to the queue, it always needs to go through an exchange
+All we need to know now is how to use a default exchange identified by an empty string.
+
+
+Basic Publish:
+#!/usr/bin/env python
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel = connection.channel()
+channel.queue_declare(queue='hello')
+channel.basic_publish(exchange='',routing_key='hello',body='Hello World!')
+print " [x] Sent 'Hello World!'"
+connection.close()
+
+
+Basic Receive:
+
+#!/usr/bin/env python
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel = connection.channel()
+channel.queue_declare(queue='hello')
+print ' [*] Waiting for messages. To exit press CTRL+C'
+
+def callback(ch, method, properties, body):
+    print " [x] Received %r" % (body,)
+
+channel.basic_consume(callback,queue='hello', no_ack=True)
+channel.start_consuming()
+
