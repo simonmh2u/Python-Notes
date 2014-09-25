@@ -23,18 +23,17 @@ def deque():
 
 
 #Implement a  Fifo:
-In [39]: class fifi(object):
-   ....:     def __init__(self):
-   ....:         self.cont=[]
-   ....:     def poper(self):
-   ....:         self.cont.reverse()
-   ....:         r = self.cont.pop()
-   ....:         self.cont.reverse()
-   ....:         return r
-   ....:     def pusher(self,var):
-   ....:         self.cont.append(var)
-   ....:     def prn(self):
-   ....:         print self.cont
+ class fifi(object):
+     def __init__(self):
+         self.cont=[]
+     def poper(self):
+         r = self.cont[0]
+         self.cont.remove(self.cont[0])
+         return r
+     def pusher(self,var):
+         self.cont.append(var)
+     def prn(self):
+         print self.cont
 
 
 #Find substr within a string
@@ -47,9 +46,142 @@ def substr(s1,s2):
     return False
 
 
-Fibonacci sequence
+#Fibonacci sequence
 def fib(n):
     x,y=0,1
     for i in range(n):
         yield x
         x,y=y,x+y
+
+
+
+#Singly Linked List
+
+class Node(object):
+  def __init__(self,data):
+    self.data = data
+    self.next = None
+
+  def getNext(self):
+    return self.next
+
+  def setNext(self,newNode):
+    self.next = newNode
+
+  def getData(self):
+    return self.data
+
+  def setData(self,data):
+    self.data = data
+
+
+class LinkedList(object):
+  def __init__(self):
+    self.head = None
+
+  def add(self,data):
+    node = Node(data)
+    node.setNext(self.head)
+    self.head = node
+
+  def remove(self,item):
+    current = self.head
+    found = False
+    previous = None
+
+    while not found:
+      if current.getData() == item:
+        found = True
+      else:
+        previous = current
+        current = current.getNext()
+
+    if previous == None:
+      self.head = current.getNext()
+    else:
+      previous.setNext(current.getNext())
+
+  def search(self,item):
+    found = False
+    current = self.head
+
+    while not found and current.getNext() != None:
+      if current.getData() == item:
+        found = True
+      else:
+        current = current.getNext()
+
+
+mylist = LinkedList()
+
+
+#Palindrome
+ def ispalin(l):
+    d = deque(l)
+    found = True
+    while found and len(d)>1:
+        if d.popleft() != d.pop():
+            found = False
+    return found
+
+
+#Binary Tree
+class CNode:
+    left , right, data = None, None, 0
+    
+    def __init__(self, data):
+        # initializes the data members
+        self.left = None
+        self.right = None
+        self.data = data
+
+class CBOrdTree:
+    def __init__(self):
+        # initializes the root member
+        self.root = None
+    
+    def addNode(self, data):
+        # creates a new node and returns it
+        return CNode(data)
+
+    def insert(self, root, data):
+        # inserts a new data
+        if root == None:
+            # it there isn't any data
+            # adds it and returns
+            return self.addNode(data)
+        else:
+            # enters into the tree
+            if data <= root.data:
+                # if the data is less than the stored one
+                # goes into the left-sub-tree
+                root.left = self.insert(root.left, data)
+            else:
+                # processes the right-sub-tree
+                root.right = self.insert(root.right, data)
+            return root
+
+#Doubly Linked List
+
+#Any Sorting (Bubble sort)
+def bubblesort(alist):
+  for i in range(len(alist)-1,0,-1):
+    for j in range(i):
+      if alist[j] > alist[j+1]:
+        alist[j],alist[j+1] = alist[j+1],alist[j]
+
+#Singleton
+
+#Permutations and Combinations
+
+#DFS BFS
+
+#Probability
+
+#Implement Hash Table                                                                                                  
+#Using has function to convert string keys in integers for efficiency
+
+
+#Bit Manipulation
+
+#Graph Heap
