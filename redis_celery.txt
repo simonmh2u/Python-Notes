@@ -858,3 +858,198 @@ def callback(ch, method, properties, body):
 channel.basic_consume(callback,queue='hello', no_ack=True)
 channel.start_consuming()
 
+
+
+*Round-robin dispatching
+One of the advantages of using a Task Queue is the ability to easily parallelise work. If we are building up a backlog of work, we can just add more workers and that way, scale easily.
+
+*MEssage Ack:
+In order to make sure a message is never lost, RabbitMQ supports message acknowledgments. An ack(nowledgement) is sent back from the consumer to tell RabbitMQ that a particular message had been received, processed and that RabbitMQ is free to delete it.
+
+
+*Durability:
+When RabbitMQ quits or crashes it will forget the queues and messages unless you tell it not to. Two things are required to make sure that messages aren't lost: we need to mark both the queue and messages as durable.
+First, we need to make sure that RabbitMQ will never lose our queue. In order to do so, we need to declare it as durable:
+
+channel.queue_declare(queue='hello', durable=True)
+
+*Masrking messages as persistent:
+channel.basic_publish(exchange='',
+                      routing_key="task_queue",
+                      body=message,
+                      properties=pika.BasicProperties(
+                         delivery_mode = 2, # make message persistent
+                      ))
+
+*Fair Dispatch:
+In order to defeat that we can use the basic.qos method with the prefetch_count=1 setting. This tells RabbitMQ not to give more than one message to a worker at a time. Or, in other words, don't dispatch a new message to a worker until it has processed and acknowledged the previous one. Instead, it will dispatch it to the next worker that is not still busy.
+
+channel.basic_qos(prefetch_count=1)
+
+*Types of Exchange:
+There are a few exchange types available: direct, topic, headers and fanout. We'll focus on the last one -- the fanout
+
+Declaring Exchange:
+channel.exchange_declare(exchange='logs', type='fanout')
+
+
+All to gether in Worker code:
+channel.exchange_declare(exchange='logs', type='fanout')
+result = channel.queue_declare(exclusive=True)   #Create temporary queue and make sure the Q is deleted after disconnection by specifyin exclusve arg.
+queue_name = result.method.queue            #Get Queue Name
+channel.queue_bind(exchange='logs',queue=queue_name)    #Bind the EXC and the Queue .A binding is a relationship between an exchange and a queue. This can be simply read as: the queue is interested in messages from this exchange.
+
+then  Consume
+
+*Direct Exchange:
+The routing algorithm behind a direct exchange is simple - a message goes to the queues whose binding key exactly matches the routing key of the message.
+Publisher.
+channel.exchange_declare(exchange='direct_logs',type='direct')
+channel.basic_publish(exchange='direct_logs',routing_key=severity,body=message)
+
+Worker 
+for severity in severities:
+    channel.queue_bind(exchange='direct_logs', queue=queue_name,routing_key=severity)
+
+
+
+Topics Exchange:
+Messages sent to a topic exchange can't have an arbitrary routing_key - it must be a list of words, delimited by dots
+The binding key must also be in the same form. The logic behind the topic exchange is similar to a direct one - a message sent with a particular routing key will be delivered to all the queues that are bound with a matching binding key. However there are two important special cases for binding keys:
+    * (star) can substitute for exactly one word.
+    # (hash) can substitute for zero or more words.
+
+Topic exchange is powerful and can behave like other exchanges.
+When a queue is bound with "#" (hash) binding key - it will receive all the messages, regardless of the routing key - like in fanout exchange.
+When special characters "*" (star) and "#" (hash) aren't used in bindings, the topic exchange will behave just like a direct one
+
+
+Full Code :
+The code for emit_log_topic.py:
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+
+    
+
+#!/usr/bin/env python
+import pika
+import sys
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+        host='localhost'))
+channel = connection.channel()
+
+channel.exchange_declare(exchange='topic_logs',
+                         type='topic')
+
+routing_key = sys.argv[1] if len(sys.argv) > 1 else 'anonymous.info'
+message = ' '.join(sys.argv[2:]) or 'Hello World!'
+channel.basic_publish(exchange='topic_logs',
+                      routing_key=routing_key,
+                      body=message)
+print " [x] Sent %r:%r" % (routing_key, message)
+connection.close()
+
+The code for receive_logs_topic.py:
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+
+    
+
+#!/usr/bin/env python
+import pika
+import sys
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+        host='localhost'))
+channel = connection.channel()
+
+channel.exchange_declare(exchange='topic_logs',
+                         type='topic')
+
+result = channel.queue_declare(exclusive=True)
+queue_name = result.method.queue
+
+binding_keys = sys.argv[1:]
+if not binding_keys:
+    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    sys.exit(1)
+
+for binding_key in binding_keys:
+    channel.queue_bind(exchange='topic_logs',
+                       queue=queue_name,
+                       routing_key=binding_key)
+
+print ' [*] Waiting for logs. To exit press CTRL+C'
+
+def callback(ch, method, properties, body):
+    print " [x] %r:%r" % (method.routing_key, body,)
+
+channel.basic_consume(callback,
+                      queue=queue_name,
+                      no_ack=True)
+
+channel.start_consuming()
+
+
+
+
+
+
+
+
+
+
+
+
+
