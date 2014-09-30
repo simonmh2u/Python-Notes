@@ -182,6 +182,38 @@ By default mongodb will update only single document, to update multiple you need
 If you don't specify deletion criteria, then mongodb will delete whole documents from the collection. This is equivalent of SQL's truncate command.
 >db.mycol.remove()
 
+
+*All:
+db.people.find({name:{$all:['simon','simons']}})
+*In
+db.people.find({name:{$in:['simon','simons']}})
+
+
+Dot Notation can be used for embedded nested documents , here address is nested within user documet.
+db.people.find({'user.address':'indal'})
+
+
+*Update:
+db.people.update({name:'simon'},{'name':'Simon'}) # This remove all other fields if it exists other than name.
+
+*To prevent above we can do below:
+db.people.update({name:'simon'},{$set:{'name':'Simon'}})
+db.people.update({name:'simon'},{$unset:{'name':'Simon'}}) # this will remove this field from the doc
+
+for doc such as {_id:1,a:[1,2,3,4]} to add elements to a filed we do below
+db.people.update({_id:1},{$push:{a:5}})  #similaryly use pop or pushAll to add multiple elemets simultaneously, pull and pullALL removes specified values
+
+
+*Upserts:
+Adds a docuemtn if it doesnt already exist. for ex:
+db.people.update({name:Simon},{age:30},{upsert=1}) # THis adds a docuemtn if a docusntme with name Simon doesnt already exist.
+
+*multi: By default mongo update affects only one document even if the criteria amthces multiple docs. use multi to change all matching docs.
+db.people.update({},{age:30},{multi=1})
+
+
+*db.runCommand({getLastError:1}) # Gives the status of the last command executed
+
 *LIMIT and SKIP*
 Following example will display only 2 documents while quering the document.
 > db.people.find({},{name:1,_id:0}).limit(3)
@@ -193,6 +225,9 @@ Following example will display only 2 documents while quering the document.
 { "name" : "Alice" }
 { "name" : "Bob" }
 
+
+
+
 *SORT*
 Following example will display the documents sorted by title in descending order.
 
@@ -200,6 +235,11 @@ Following example will display the documents sorted by title in descending order
 {"title":"Tutorials Point Overview"}
 {"title":"NoSQL Overview"}
 {"title":"MongoDB Overview"}
+
+
+
+
+
 
 
 *INDEX*
@@ -212,7 +252,12 @@ unique	: Boolean	Creates a unique index so that the collection will not accept i
 
 sparse	: Boolean	If true, the index only references documents with the specified field. These indexes use less space but behave differently in some situations (particularly sorts). The default value is false.
 
+db.system.indexes.find() # shows all indexes in current databse.
+db.poeple.getIndexes() give detaila abuot the collection
 
+db.people.dropIndexes() # drops the indexes
+
+Unique indexes are the ones which will not allow multiple values to be set to the key.
 
 
 *Agregation*
@@ -292,3 +337,51 @@ db.users.findOne({"name":"Tom Benzamin"},{"address":1}) # THis gives the address
 var result = db.users.findOne({"name":"Tom Benzamin"},{"address_ids":1})
 var addresses = db.address.find({"_id":{"$in":result["address_ids"]}})
 
+
+
+* What is a Covered Query
+As per the official MongoDB documentation, a covered query is a query in which:
+    all the fields in the query are part of an index and
+    all the fields returned in th query are in the same index
+Since all the fields present in the query are part of an index, MongoDB matches the query conditions and returns the result using the same index without actually looking inside documents
+
+*Explain
+>db.users.find({gender:"M"},{user_name:1,_id:0}).explain()
+ The true value of indexOnly indicates that this query has used indexing.
+The cursor field specifies the type of cursor used. BTreeCursor type indicates that an index was used and also gives the name of the index used. BasicCursor indicates that a full scan was made without using any indexes.
+n indicates the number of documents matching returned.
+nscannedObjects indicates the total number of documents scanned
+nscanned indicates the total number of documents or index entries scanned 
+*hint
+The $hint operator forces the query optimizer to use the specified index to run a query. This is particularly useful when you want to test performance of a query with different indexes. For example, the following query specifies the index on fields gender and user_name to be used for this query :
+>db.users.find({gender:"M"},{user_name:1,_id:0}).hint({gender:1,user_name:1})
+
+*MongoDB does not support multi-document atomic transactions. However, it does provide atomic operations on a single document. So if a document has hundred fields the update statement will either update all the fields or none, hence maintaining atomicity at document-level. 
+
+
+*Searching:
+ Now that we have created the text index on post_text field, we will search for all the posts that have word tutorialspoint in their text.
+
+>db.posts.find({$text:{$search:"tutorialspoint"}})
+
+The above command returned the following result documents having tutorialspoint word in thier post text:
+
+{ 
+   "_id" : ObjectId("53493d14d852429c10000002"), 
+   "post_text" : "enjoy the mongodb articles on tutorialspoint", 
+   "tags" : [ "mongodb", "tutorialspoint" ]
+}
+{
+   "_id" : ObjectId("53493d1fd852429c10000003"), 
+   "post_text" : "writing tutorials on mongodb",
+   "tags" : [ "mongodb", "tutorial" ] 
+}
+
+
+*GridFS is the MongoDB specification for storing and retrieving large files such as images, audio files, video files, etc. It is kind of a file system to store files but its data is stored within MongoDB collections. GridFS has the capability to store files even greater than its document size limit of 16MB. 
+
+
+*Shardgin:
+Data Partitioning
+
+MongoDB distributes data, or shards, at the collection level. Sharding partitions a collection’s data by the shard key
