@@ -88,7 +88,7 @@ for i in item:
 {
 	"_id" : ObjectId("541aee1adadcbf2334b38e5e"),
 	"a" : 1,
-	"fruits" : [
+	"fruits" : [l
 		"apple",
 		"baan"
 	]
@@ -214,6 +214,14 @@ db.people.update({},{age:30},{multi=1})
 
 *db.runCommand({getLastError:1}) # Gives the status of the last command executed
 
+
+
+
+*query_plan : the procedure of choosing a fastest index
+
+
+*Profieling; db.system.profile.find({millis:{$gt:10000}})
+
 *LIMIT and SKIP*
 Following example will display only 2 documents while quering the document.
 > db.people.find({},{name:1,_id:0}).limit(3)
@@ -262,9 +270,93 @@ Unique indexes are the ones which will not allow multiple values to be set to th
 
 *Agregation*
 
-**TODO**
+
+Example:
+Always in List []
+db.products.aggregate([{$group:{
+	"_id":"$manufacturer",
+	"num_products":{"$sum":1}
+
+}
+}
+])
 
 
+Aggregate Pipeline : $project (select )-->$match  (filter)--> $group (aggregatopm) --> sort --> skip -->limit -->unwind
+
+Compoung groupings:
+
+db.products.aggregate([
+	{$group:
+		{
+			"_id":
+				{
+					"maker":$manufacturer,
+		   			"category":$category
+		   		},
+			"num_products":{$sum:1}
+		}
+	}
+)]
+
+
+
+Aggregate expressions:
+sum , avg, min , max, push , addtoSet, first , last
+
+*addtoSet # push is similar but it will not guarantee uniqueness
+db.products.aggregate([
+	{$group:
+		{
+			"_id":
+				{
+					"maker":$manufacturer,
+		   			 
+		   		},
+			"categories":{$addtoSet:$category}
+		}
+	}
+)]
+
+
+*MAx
+db.products.aggregate([
+	{$group:
+		{
+			"_id":
+				{
+					"maker":"$manufacturer",
+		   			 
+		   		},
+			"max_price":{$max:"$price"}
+		}
+	}
+)]
+
+
+$project :
+allows to modify/reshape document like add or remove keys or use simple funcs like toUpper etc
+
+db.products.aggregate([
+	{$project:
+		{
+			_id:0,
+			'maker':{toLower("$manufactuer")},
+			'details':{ category: "$category", price:{$multiply:[$price,10]}},
+			'item':'$name'
+		}
+	}
+])
+http://docs.mongodb.org/manual/reference/sql-aggregation-comparison/
+
+
+
+
+
+
+
+
+**APPLICATION ENGINEERING***
 
 Replica Set:
 How replication works in MongoDB
