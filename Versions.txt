@@ -1,0 +1,147 @@
+Django
+
+1.3[29]	23 Mar 2011	Class based views, staticfiles
+1.4[30]	23 Mar 2012	Timezones, in browser testing, app templates. Long-term support release, supported until at least March 2015
+1.5[31]	26 Feb 2013	Python 3 Support, configurable user model
+The biggest new feature in Django 1.5 is the configurable User model.we can have our own user model and not necessairly use auth model that is inbuilt
+
+1.6[32]	6 Nov 2013	Dedicated to Malcolm Tredinnick, db transaction management, connection pooling.
+Database-level autocommit is now turned on by default. This makes transaction handling more explicit and should improve performance
+Django now supports reusing the same database connection for several requests. 
+
+1.7[33]	2 Sep 2014	Migrations like south but internal, application loading and configuration
+
+
+
+Python
+Python 2.5 - September 19, 2006
+Python 2.6 - October 1, 2008  with enabled by default 
+multiprocessing package was addded
+advanced string formatting format function
+Python 2.7 - July 3, 2010 --> Ordered Dict was added
+memoryview was added .The memoryview object provides a view of another object’s memory content
+
+
+SQLAlchemy
+0.6.9 May  2012
+0.7.1 Feb  2013
+0.8 July 2014
+0.9 July 2014
+
+
+Tasty Pie
+0.12.0	Sept. 12, 2014
+0.11.1	May 22, 2014
+0.11.0	Dec. 3, 2013
+0.10.0	Aug. 3, 2013
+0.9.16	Aug. 3, 2013
+0.9.15	May 3, 2013
+0.9.14	March 19, 2013
+0.9.6	Feb. 19, 2011
+
+
+MongoDB
+
+2.6.4 – August 11, 2014
+2.4.1 – April 17, 2013
+
+
+Celery
+3.1.10	March 31, 2014
+3.1.0	Nov. 10, 2013
+3.0.23	Sept. 3, 2013
+3.0.0	July 7, 2012
+2.5.5	April 19, 2012
+2.5.0	Feb. 24, 2012
+2.4.0	Nov. 4, 2011
+2.3.3	Aug. 22, 2011
+2.3.0	Aug. 5, 2011
+2.2.7	Aug. 6, 2011
+2.2.0	Feb. 1, 2011
+2.1.4	Dec. 3, 2010
+2.1.0	Oct. 8, 2010
+2.0.0	July 2, 2010
+
+Redis
+on Dec 26, 2012 2.6.7
+Jan 2013  Feb 11, 2013
+2.8.0 on Nov 22, 2013
+
+RabbitMQ
+2.2.0 Nov 2010
+2.5 June 2011
+2.8.0 March 2012
+3.0 Nov 2012
+3.1 May 2013
+
+
+uwsgi
+2.0 20131230
+2.0.1 20140209
+2.0.5 20140601
+2.0.7 20140905
+
+gunicorn
+0.15.0 / 2012-10-18
+0.17.0 / 2012-12-25
+0.17.4 / 2013-04-24
+17.5 / 2013-07-03
+18.0 / 2013-08-26
+
+Apache
+
+Apache 2.2 Releases		
+2.2.29: Released September 1, 2014
+2.2.28: Not released
+2.2.27: Released March 18, 2014
+2.2.26: Released November 16, 2013
+2.2.25: Released July 9, 2013
+2.2.24: Released February 25, 2013
+2.2.23: Released September 13, 2012
+2.2.22: Released January 31, 2012
+2.2.21: Released September 13, 2011
+2.2.20: Released August 30, 2011
+2.2.19: Released May 21, 2011
+2.2.18: Released May 11, 2011
+2.2.17: Released October 18, 201
+
+JQuery/AJAX
+
+1.4	January 14, 2010			
+1.5	January 31, 2011			Deferred callback management, ajax module rewrite
+1.6	May 3, 2011			Significant performance improvements to the attr() and val() functions
+1.7	November 3, 2011			New Event APIs: .on() and .off(), while the old APIs are still supported.
+1.8	August 9, 2012		91.4	Sizzle Selector Engine rewritten, improved animations and $(html, props) flexibility.
+1.9	January 15, 2013	1.9.1 (February 4, 2013)[26]		Removal of deprecated interfaces and code cleanup
+
+Bootstrap
+2012 2.1.0
+3.0 Aug 2013
+Current 3.2
+
+MySQL
+5.5  2010
+5.6 2013
+
+
+Postgres
+9.0  2010-09-20
+9.1 2011-09-12
+9.2 2012-09-10
+9.3 2013-09-09
+
+Fabric
+2012-07-06: released Fabric 1.4.3
+2012-11-06: released Fabric 1.5.0
+2013-03-01: released Fabric 1.6.0
+2013-03-01: released Fabric 1.5.4
+2013-12-24: released Fabric 1.6.4
+
+
+Memcached:
+2009 1.4.2
+2011 1.4.10
+2012 1.4.12
+
+
+
