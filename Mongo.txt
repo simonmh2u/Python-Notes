@@ -390,6 +390,16 @@ Basic syntax of rs.add() command is as follows:
 >rs.add(HOST_NAME:PORT)
 
 
+pymongo will allow us to directly connect to the replica set.
+
+conn = Mongoclient(host='mongodb://localhost:27017',replicaSet=rs1,w=1,j=True)
+db = conn.test
+things = db.things
+
+things.insert({...}) # this will write it to primary
+
+
+
 *DUMPING and RESTORING*
 mongodump --host HOST_NAME --port PORT_NUMBER	This commmand will backup all databases of specified mongod instance.	mongodump --host tutorialspoint.com --port 27017
 mongodump --dbpath DB_PATH --out BACKUP_DIRECTORY		mongodump --dbpath /data/db/ --out /data/backup/
