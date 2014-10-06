@@ -366,7 +366,24 @@ After the recovery of failed node, it again join the replica set and works as a 
 
 Starting a replica set:
 mongod --port "PORT" --dbpath "YOUR_DB_DATA_PATH" --replSet "REPLICA_SET_INSTANCE_NAME"
-mongod --port 27017 --dbpath "D:\set up\mongodb\data" --replSet rs0
+mongod --port 27017 --dbpath /data/rs1 --replSet rs1 --fork
+mongod --port 27018 --dbpath /data/rs2 --replSet rs1 --fork
+mongod --port 27019 --dbpath /data/rs3 --replSet rs1 --fork
+
+
+Within the mongo shell:
+
+config = { _id : rs1,members = [{
+		{_id:0, host:"localhost:27017", priority=0,slaveDelay=5},
+		{_id:1, host:"localhost:27018"},
+		{_id:2, host:"localhost:27019"}
+}]}
+
+rs.initiate()
+rs.status()
+
+
+rs.slaveOK() is the command which will allow us to read from secondary on the connection that this command is run on.
 
 It will start a mongod instance with the name rs0, on port 27017. Now start the command prompt and connect to this mongod instance. In mongo client issue the command rs.initiate() to initiate a new replica set. To check the replica set configuration issue the command rs.conf(). To check the status of replica sete issue the command rs.status().
 Basic syntax of rs.add() command is as follows:
@@ -473,7 +490,13 @@ The above command returned the following result documents having tutorialspoint 
 *GridFS is the MongoDB specification for storing and retrieving large files such as images, audio files, video files, etc. It is kind of a file system to store files but its data is stored within MongoDB collections. GridFS has the capability to store files even greater than its document size limit of 16MB. 
 
 
-*Shardgin:
+*Sharding:
 Data Partitioning
 
 MongoDB distributes data, or shards, at the collection level. Sharding partitions a collection’s data by the shard key
+
+
+Write concern:
+w = 1 , j= 0 means wait for ack from mongo that it received the request frmo app
+w = 1 , j = 1 means wait for ack after the changes are written to the journal log.
+w = 0 , j = 0 , just fire and forget which is the default behaviour.
