@@ -270,6 +270,92 @@ Unique indexes are the ones which will not allow multiple values to be set to th
 
 *Agregation*
 
+<<<<<<< HEAD
+=======
+
+Example:
+Always in List []
+db.products.aggregate([{$group:{
+	"_id":"$manufacturer",
+	"num_products":{"$sum":1}
+
+}
+}
+])
+
+
+Aggregate Pipeline : $project (select )-->$match  (filter)--> $group (aggregatopm) --> sort --> skip -->limit -->unwind
+
+Compoung groupings:
+
+db.products.aggregate([
+	{$group:
+		{
+			"_id":
+				{
+					"maker":$manufacturer,
+		   			"category":$category
+		   		},
+			"num_products":{$sum:1}
+		}
+	}
+)]
+
+
+
+Aggregate expressions:
+sum , avg, min , max, push , addtoSet, first , last
+
+*addtoSet # push is similar but it will not guarantee uniqueness
+db.products.aggregate([
+	{$group:
+		{
+			"_id":
+				{
+					"maker":$manufacturer,
+		   			 
+		   		},
+			"categories":{$addtoSet:$category}
+		}
+	}
+)]
+
+
+*MAx
+db.products.aggregate([
+	{$group:
+		{
+			"_id":
+				{
+					"maker":"$manufacturer",
+		   			 
+		   		},
+			"max_price":{$max:"$price"}
+		}
+	}
+)]
+
+
+$project :
+allows to modify/reshape document like add or remove keys or use simple funcs like toUpper etc
+
+db.products.aggregate([
+	{$project:
+		{
+			_id:0,
+			'maker':{toLower("$manufactuer")},
+			'details':{ category: "$category", price:{$multiply:[$price,10]}},
+			'item':'$name'
+		}
+	}
+])
+http://docs.mongodb.org/manual/reference/sql-aggregation-comparison/
+
+
+
+
+
+
 
 Example:
 Always in List []
@@ -356,6 +442,7 @@ http://docs.mongodb.org/manual/reference/sql-aggregation-comparison/
 
 
 
+=======
 **APPLICATION ENGINEERING***
 
 Replica Set:
