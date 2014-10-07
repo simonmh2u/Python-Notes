@@ -55,6 +55,16 @@ Read answer
 There are two ways in which objects can be copied in python.
 Shallow copy & Deep copy...............
 Read answer
+In python multipl reference vars can point to same location in memory unlees told to do otherwise.
+For ex in a list when u copy a list using slice operator it creates a shallow copy with each object ointing to same location in meory
+l = range(5)
+l1 = l[:]
+In [104]: id(l[0]) == id(l1[0])
+Out[104]: True
+
+So when there are complex objects in a list like sub list , making chanes to one of them makes changes to the other one as well. So when a list hols
+complex objects use deepcopy to make a copy of the list instead of sliciing.
+
 15.How can I find the methods or attributes of an object in python?
 
 Built-in dir() function of Python ,on an instance shows the instance variables as well as the methods and class attributes defined by the instance's class and all its base classes alphabetically. So by any object as argument to dir() we can find all the methods & attributes of the object’s class................
@@ -70,6 +80,9 @@ Read answer
 18.How do you make an array in Python?
 
 The array module contains methods for creating arrays of fixed types with homogeneous data types. Arrays are slower then list..............
+ a = array.array('i',range(10))
+They can hold only homogenous items and are more perfomant as they know before hand the size of ech element
+
 Read answer
 19.Explain how to create a multidimensional list.
 
@@ -82,33 +95,26 @@ Read answer
 21.Describe how to send mail from a Python script.
 
 The smtplib module defines an SMTP client session object that can be used to send mail to any Internet machine.................
-Read answer
+smtpObj = smtplib.SMTP('localhost')
+   smtpObj.sendmail(sender, receivers, message)         
+   print "Successfully sent email"
+
 22.Describe how to generate random numbers in Python.
 
 Thee standard module random implements a random number generator.  There are also many other in this module, such as:...............
 Read answer
+
 23.How do we make python scripts executable?
 
 Python scripts can be executed in two ways: Suppose I want to execute script1.py
 We can open the script1.py in IDE editor & run the script in the frontmost window of the python IDE by hitting the run all button...............
 Read answer
-24.Explain how to make Forms in python.
 
-As python is scripting language forms processing is done by Python. We need to import cgi module to access form fields using FieldStorage class.................
-Read answer
-25.Describe how to implement Cookies for Web python.
-
-A cookie is an arbitrary string of characters that uniquely identify a session. Each cookie is specific to one Web site and one user................
-Read answer
-26.Describe how to use Sessions for Web python.
-
-Sessions are the server side version of cookies. While a cookie preserves state at the client side, sessions preserves state at server side..............
-Read answer
 27.Describe how exceptions are handled in python.
 
 Errors detected during execution of program are called exceptions. Exceptions can be handled using the try..except statement. We basically put our usual statements within the try-block and put all our error handlers in the except-block...............
 Read answer
-28.What is used to create Unicode string in Python?
+28. What is used to create Unicode string in Python?
 
 Unicode is a system to represent characters from all the world's different languages. Two methods can be used to create unicode string:.................
 Read answer
@@ -211,7 +217,7 @@ obj.search()
 Delegation is a technique that is used in object oriented programming. This is used to show the object and the behavior of the methods that are used. The class can be created to provide an implementation of the method that allows the method to be referenced. The delegate is having the parameter and the return value in an object. It also allows the methods to be passed as parameters and allow the defining of the callback methods that can be grouped together in multiple methods. These methods can be called from a single event. The example shows a class that captures the behavior of the file and converts data from lower to uppercase.
 
 class upcase:
-def __init__(self, out):
+def __init__(self, out): 
 self._out = out
 def write(self, s):
 self._outfile.write(s.upper())
@@ -267,7 +273,10 @@ exec python $0 ${1+"$@"}
 
 46. How does global value mutation used for thread-safety?
 
-The global interpreter lock is used to allow the running of the thread one at a time. This is internal to the program only and used to distribute the functionality along all the virtual machines that are used. Python allows the switching between the threads to be performed by using the byte code instructions that are used to provide platform-independence. The sys.setcheckinterval() method is used that allow the switching to occur during the implementation of the program and the instruction. This provides the understanding in the field of accounting to use the byte code implementation that makes it portable to use. The atomicity can be provided such that the shared variables can be given as built-in data types.
+Python's GIL is intended to serialize access to interpreter internals from different threads. On multi-core systems, it means that multiple threads can't effectively make use of multiple cores. (If the GIL didn't lead to this problem, most people wouldn't care about the GIL - it's only being raised as an issue because of the increasing prevalence of multi-core systems.) If you want to understand it in detail, you can view this video or look at this set of slides. It might be too much information, but then you did ask for details :-)
+
+Note that Python's GIL is only really an issue for CPython, the reference implementation. Jython and IronPython don't have a GIL. As a Python developer, you don't generally come across the GIL unless you're writing a C extension. C extension writers need to release the GIL when their extensions do blocking I/O, so that other threads in the Python process get a chance to run.
+
 47. Write a program to read and write the binary data using python?
 
 The module that is used to write and read the binary data is known as struct. This module allows the functionality and with it many functionalities to be used that consists of the string class. This class contains the binary data that is in the form of numbers that gets converted in python objects for use and vice versa. The program can read or write the binary data is:
@@ -288,9 +297,7 @@ tochild.write("input\n")
 tochild.flush()
 output = fromchild.readline()
 49. What are the different ways to generate random numbers?
-
-Random module is the standard module that is used to generate the random number.
-The method is defined as:
+ 
 import random
 random.random()
 
@@ -301,15 +308,24 @@ The statement random.random() method return the floating point number that is in
 • The Random class that is used and instantiated creates an independent multiple random number generators.
 50. Write a program to show the singleton pattern used in python.
 
-Singleton patter is used to provide a mechanism that limits the number of instances that can be used by one class. It also allows the same object to be shared between many different parts of the code. This allows the global variables to be used as the actual data that is used is hidden by the singleton class interface. The singleton class interface can have only one public member and one class method Handle. Private constructors are not used to create an object that is used outside the class. The process waits for the static member function to create new instances and return the singleton object. The code that is used to call the singleton object is:
+class __OnlyOne: 
+	def __init__(self): 
+		pass
 
-Singleton& Singleton::Handle()
-{
-if( !psingle ) {
-psingle = new Singleton;
-}
-return *psingle;
-}
+	def __str__(self): 
+		return 'Non'
 
+	instance = {} 
+	def __init__(self): 
+		if self.__class__ not in Singleton.instance: 
+			Singleton.instance[self.__class__] = Singleton.__OnlyOne()
+			return True
+		else :
+			print 'warning : trying to recreate a singleton'
+			return False
 
+	def __getattr__(self, name): 
+		return getattr(self.instance[self.__class__], name)
 
+	def __setattr__(self, name, value):
+		return setattr(self.instance[self.__class__], name, value)
