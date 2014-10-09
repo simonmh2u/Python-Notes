@@ -109,13 +109,27 @@ def multable(n):
 
 
 Define the following object oriented concepts:
+INheritance , polymorphism , encapsulation
+
 What is a hashtable? Give an example of a type of problem that a hashtable is useful for.
+Takes arbitrary name as key and generates a numeric key value which maps to a bucket where values are stored. giviven the same input the output remans the same always. Example : Routers where ip address is the key and paths are the values.
+
 Explain big o notation and how it is useful in computer science to classify algorithms.
+it measures the efficiency of an algorithm based on the time it takes for the algorithm to run as a function of the input size
+It basically means how many time each elelent in the input is touched(compared,added any operation)
+
 What order is a hash table lookup?
-For the data structures: Array and Linked List explain:
-Describe bitwise operators AND, OR, XOR and NOT. Describe how you might use these.
+O(1)
+
+Describe bitwise operators AND, OR, XOR (^)and NOT (~). Describe how you might use these.
+
 How do these bitwise operators differ from logical operators?
+The logical operator works on booleans, and the bitwise operator works on bits
+it is important to note that the logical-OR is short circuit, meaning that if its first argument evaluates to true, then the second argument is left unevaluated. The bitwise operator evaluates both of its arguments regardless
+
 What's the value of hexadecimal FF in decimal?
+15x16^1 + 15x16^0 = 240 + 15  = 255
+
 Write a program to find the largest integer in an array of integers.
 In [13]: k = 0 
 
@@ -126,15 +140,50 @@ In [14]: for i in l:
 
 In [15]: k
 Out[15]: 192
+
+
 Write a function that sums up integers from a text file that looks like the following:
+with open('sim.txt') as f:
+    for i in f:
+        l.extend((i.strip().split(',')))
+
 Write function to print the odd numbers from 1 to 99
+In [271]: def odd(n):
+    if n%2 != 0:
+        return True
+    else:
+        return False
+   .....:     
+
+In [272]: filter(odd,range(10))
+
 Explain the difference between method overloading and method overriding
+
+overloading is change in function behaviour based on number of types of arguements pass to the function of same name
+
+overriding is sompletely changin the finctionality of exsitinf function in super class by the sub class.
+
 What is __init__.py? Give an example of where you would use it.
+this file is used to create packages.empty file
+
+
 Explain what a list comprehension is and write some code that illustrates an example use.
+This is performing an operation on a list to create a new list.
+
+Ex: l = [1,2,3,4,5]
+ l = [ i*i for i in l] gives [1, 4, 9, 16, 25]
+
 Explain the difference between a tuple and a list and give an example of where you would use each.
+Lists is mutable and tuple is immutable, tuple can be used for read only config sets 
+
+
 Explain what the following Python code does:
 print phrase[:4] + phrase[4:]
 Write a program to open a file for reading and print out its entire contents
+with open('sim.txt') as f:
+    for i in f:
+    print i
+
 Write a python program that will take the following list of words as input and output a dictionary with a the frequency of each word:
 words = ['apple', 'apple', 'banana', 'banana', 'banana', 'pear', 'banana', 'pear', 'pear', 'pear', 'pear', 'pear']
 In [21]: c
@@ -146,16 +195,29 @@ Out[22]: 6
 Write one line of readable Python code that will print the sum the integers from 1 to 100
 sum([i for i in range(100)])
 
-Write a function to take the following list and return one list of odd numbers and one list of even numbers:
 What is load balancing? Describe three different types of load balancing techniques? What problems can load balancing solve? What problems can it introduce?
+round robin ,numer of existing conncetions , fast responding
+
 A user types the following URL into their browser: http://www.foo.com/bar.php
 Explain in detail how this would cause a page to appear in their browser, with images, interactive elements (Ajax), styled paragraphs of text etc.
+html page gets renderd from top to bottom , request with this url hits the web server and the web servers starts loading the static elements starting with CSS and images as and when they are encountered and lastly javascript elements liske ajax jquery etc. by this time the web server might in a diff thread  even send a request to load the dynamic elements of the page like the contens of the page from application server like gunicorn or wsgi .
+Tihs reques is reached at the controller which gets mapped to a view which generates the data from model and sends back to the controler with response.
+
 What is a generic view in Django? What generic views ship with Django? What do they do?
+Prebuilt views which increasese reusability , Create, Update, Delete views
+
+
 Explain what the following Django model code does? What's the relationship between topping and pizza?
 class Topping(models.Model):
+
 class Pizza(models.Model):
     toppings = models.ManyToManyField(Topping)
     
+Creates a table like below with many to many relationsshups
+pizza_topping
+id , pizza_id , topping_id
+
+
 Explain in detail, what's going on in the three paths through this Django form view processing code.
 def contact(request):
     if request.method == 'POST': 
@@ -168,17 +230,64 @@ def contact(request):
         'form': form,
     })
     
+
 What is a signal in Django? Where might you use one? What's the difference between send() and send_robust()? When might you use one over the other?
+Django includes a “signal dispatcher” which helps allow decoupled applications get notified when actions occur elsewhere in the framework.
+In a nutshell, signals allow certain senders to notify a set of receivers that some action has taken place
+send() differs from send_robust() in how exceptions raised by receiver functions are handled. send() does not catch any exceptions raised by receivers; it simply allows errors to propagate. Thus not all receivers may be notified of a signal in the face of an error.
+send_robust() catches all errors derived from Python’s Exception class, and ensures all receivers are notified of the signal. If an error occurs, the error instance is returned in the tuple pair for the receiver that raised the error.
+
 What does the following code do? What's another way of doing the same thing?
-@receiver(request_finished) def my_callback(sender, **kwargs):
+@receiver(request_finished) 
+def my_callback(sender, **kwargs):
+
+request_finished.connect(my_callback
+
 Complete the following Django form to include:
-class ContactForm(forms.Form): message = forms.CharField()
+class ContactForm(forms.Form): 
+    message = forms.CharField()
+
+
+
 If you have access to a function that returns a random integer from one to five, write another function which returns a random integer from one to seven.
+
 Discuss an algorithm to traverse a tree, depth first.
+
+
 Describe a schema (or classes) to power an online car rental system. Describe the tables and the relationships beween the tables.
+
+class Vehicle(models.Model):
+    vehicle_id = models.IntegerField(primary_key=True)
+    registration_number
+    model
+    engine capacity
+    color
+    chassis_number
+
+
+class User(models.Model):
+    user_id = models.ForeignKey(User)
+    Address
+    card_details
+
+
+class Rental(models.Model):
+    days
+    time_of registration
+    vehicle_id foreigh key 
+    user_id foreign key
+    returned
+
+
+
 Construct a regular expression that matches a valid email address.
+^[\w-\.]+@([\w-]+\.)+[\w]{2,3}$
+
 Implement a function with signature find_chars(string1, string2) that takes two strings and returns a string that contains only the characters found in string1 and string two in the order that they are found in string1. Implement a version of order N*N and one of order N.
+
 Explain what a deadlock is in multithreaded programming
+
+
 Given a circular list of integers (when you reach the end of the list you come back to the beginning), what is the most efficient algorithm to find the smallest integer in the list?
 For example: circular_list = [22, 52, 66, 82, 5, 8, 12, 19].
 Given a N by N matrix of both negative and positive integers. Write an efficient algorithm to find the sub-matrix with the largest sum of all the contained elements.
