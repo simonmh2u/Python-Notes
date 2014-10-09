@@ -1,60 +1,223 @@
 Write a program to reverse a singly linked list? Modify that program to reverse a doubly linked list.
+
 Start with an array of integers, 1 through 5. First, square all the elements in the array. Then, sum all the elements of the squared array.
+*l1 = sum([l*l for l in range(1,3)])
+
 Print out the prime numbers between 1 and 100. As a first pass, don't worry about writing an efficient algorithm. Just write clear code that is easy to follow. Once you've done that, consider different possible optimizations.
-Explain the difference between the following quoting in Python:
-Explain with the following files and directories in a basic Django project do:
+In [182]: def isprime(n):
+    for i in range(2,n):
+        if n%i ==0:
+            return False
+    return True
+
+
 Complete the following Django model to illustrate how a manufacturer can make many different types of cars.
 Give manufacturer a name, founding date and a country.
 Give car a name, cost, engine capacity and color. Assume that the manufacturer makes cars in only {red, green, blue and pink}.
+
 class Manufacturer(models.Model):
+    name = models.Charfield(max_length=20,primary_key=True)
+    founding_date = models.DateTimeField()
+    country = models.Charfield(max_length=30)
+
 class Car(models.Model):
+    colorfields = ('red','green','pink','blue')
+    name = models.Charfield(primary_key=True)
+    engine_capacity = models.Integerfield()
+    color = models.Charfield(choices=colorfields)
+    manufacturer_name = models.Foreignkey(Manufacturer)
+
+
     
 Use Newton's method to approximate the square root of a method. Newton's method is to approximate z = Sqrt(x) by picking a starting point z and then repeating:
 Pick a sensible point to stop the iteration.
+
 Most languages have a built in sort method that will sort an array of strings alphabetically. Demonstrate how to sort an array of strings by the length of each string, shortest strings first.
+In [188]: s1 = ('bbgg','avv','gv','c')
+In [189]: def lop(k):
+   .....:     return len(k)
+
+In [190]: sorted(s1,key=lop)
+Out[190]: ['c', 'gv', 'avv', 'bbgg']
+
+
 Suppose you have a web form that allows users to upload JPG, GIF or PNG images. Before you store the images in your system, you want to convert them all to the JPG format. Design an image converter API. Sketch out all classes and interfaces that are involved.
 Note: the actual code necessary to convert a JPG image to a GIF image is not the point. Just place a comment at the appropriate location where the actual conversion should occur.
+
+class ImageConverter(object);
+    def __init__(self,filehandle,convert_to='jpg',size='300x300'):
+        self.filhandle = filehandle
+        self.convert_to= convert_to
+        self.size = size
+
+    def convert(self):
+        //convert using the parameters initilased in the constructro
+
+    def save(self,path='/tmp'):
+        //savethe file in the path sent
+
+
+i = ImageConverter(open('/tmp.png','rb'),'jpg','400x400')
+try:
+    i.convert()
+    i.save('/$HOME')
+except:
+    pass
+
+
 Map the social graph by examining the contents of a user's Inbox in Python
 Assume that you have access to an employee's email Inbox, and that you can parse the content of their emails, including the email headers.
 What kind of heuristics can you come up with to quantify the strength of these first-degree connections?
+
 Suppose you have an array of 99 numbers. The array contains the digits 1 to 100 with one digit missing. Describe four different algorithms to compute the missing number. Two of these should optimize for low storage and two of these should optimize for fast processing.
+
+*set(l1) - set(l)
+*In [196]: for i in l1:
+   .....:     if i not in l:
+   .....:         print i
+
+
 What is a design pattern and why are they useful in software development?
-Write a string to find a substring in a given string. Do this in O(n) or better
+
+
+
+Write a program to find a substring in a given string. Do this in O(n) or better
+In [205]: def substr(s,s1):
+    if len(s) > len(s1):
+        return False
+    else:
+        for i in range(len(s1)):
+            if s1[i:len(s)+i] == s:
+                print s
+                return True
+
+
 Write an iterative function to reverse a string. Do the same thing as a recursive function.
+In [230]: s = 'SIMON'
+In [231]: s1 = "".join(list(s)[::-1])
+In [232]: s1
+Out[232]: 'NOMIS'
+
 Write a function to implement strstr() i.e. find the first occurrence of one string inside another string.
+Same as above substr
+
 Write a program to print out a multiplication table, from 1x1 to 12x12. This should look like:
+def multable(n):
+    for i in range(1,n):
+        for j in range(1,n):
+            print '%s x %s  = %s' %(i,j,i*j)
+
+
 Define the following object oriented concepts:
+INheritance , polymorphism , encapsulation
+
 What is a hashtable? Give an example of a type of problem that a hashtable is useful for.
+Takes arbitrary name as key and generates a numeric key value which maps to a bucket where values are stored. giviven the same input the output remans the same always. Example : Routers where ip address is the key and paths are the values.
+
 Explain big o notation and how it is useful in computer science to classify algorithms.
+it measures the efficiency of an algorithm based on the time it takes for the algorithm to run as a function of the input size
+It basically means how many time each elelent in the input is touched(compared,added any operation)
+
 What order is a hash table lookup?
-For the data structures: Array and Linked List explain:
-Describe bitwise operators AND, OR, XOR and NOT. Describe how you might use these.
+O(1)
+
+Describe bitwise operators AND, OR, XOR (^)and NOT (~). Describe how you might use these.
+
 How do these bitwise operators differ from logical operators?
+The logical operator works on booleans, and the bitwise operator works on bits
+it is important to note that the logical-OR is short circuit, meaning that if its first argument evaluates to true, then the second argument is left unevaluated. The bitwise operator evaluates both of its arguments regardless
+
 What's the value of hexadecimal FF in decimal?
+15x16^1 + 15x16^0 = 240 + 15  = 255
+
 Write a program to find the largest integer in an array of integers.
+In [13]: k = 0 
+
+In [14]: for i in l:
+   ....:     if i >k:
+   ....:         k = i
+   ....:         
+
+In [15]: k
+Out[15]: 192
+
+
 Write a function that sums up integers from a text file that looks like the following:
+with open('sim.txt') as f:
+    for i in f:
+        l.extend((i.strip().split(',')))
+
 Write function to print the odd numbers from 1 to 99
+In [271]: def odd(n):
+    if n%2 != 0:
+        return True
+    else:
+        return False
+   .....:     
+
+In [272]: filter(odd,range(10))
+
 Explain the difference between method overloading and method overriding
+
+overloading is change in function behaviour based on number of types of arguements pass to the function of same name
+
+overriding is sompletely changin the finctionality of exsitinf function in super class by the sub class.
+
 What is __init__.py? Give an example of where you would use it.
+this file is used to create packages.empty file
+
+
 Explain what a list comprehension is and write some code that illustrates an example use.
+This is performing an operation on a list to create a new list.
+
+Ex: l = [1,2,3,4,5]
+ l = [ i*i for i in l] gives [1, 4, 9, 16, 25]
+
 Explain the difference between a tuple and a list and give an example of where you would use each.
+Lists is mutable and tuple is immutable, tuple can be used for read only config sets 
+
+
 Explain what the following Python code does:
 print phrase[:4] + phrase[4:]
 Write a program to open a file for reading and print out its entire contents
+with open('sim.txt') as f:
+    for i in f:
+    print i
+
 Write a python program that will take the following list of words as input and output a dictionary with a the frequency of each word:
 words = ['apple', 'apple', 'banana', 'banana', 'banana', 'pear', 'banana', 'pear', 'pear', 'pear', 'pear', 'pear']
+In [21]: c
+Out[21]: Counter({'pear': 6, 'banana': 4, 'apple': 2})
+
+In [22]: c['pear']
+Out[22]: 6
     
 Write one line of readable Python code that will print the sum the integers from 1 to 100
-Write a function to take the following list and return one list of odd numbers and one list of even numbers:
+sum([i for i in range(100)])
+
 What is load balancing? Describe three different types of load balancing techniques? What problems can load balancing solve? What problems can it introduce?
+round robin ,numer of existing conncetions , fast responding
+
 A user types the following URL into their browser: http://www.foo.com/bar.php
 Explain in detail how this would cause a page to appear in their browser, with images, interactive elements (Ajax), styled paragraphs of text etc.
+html page gets renderd from top to bottom , request with this url hits the web server and the web servers starts loading the static elements starting with CSS and images as and when they are encountered and lastly javascript elements liske ajax jquery etc. by this time the web server might in a diff thread  even send a request to load the dynamic elements of the page like the contens of the page from application server like gunicorn or wsgi .
+Tihs reques is reached at the controller which gets mapped to a view which generates the data from model and sends back to the controler with response.
+
 What is a generic view in Django? What generic views ship with Django? What do they do?
+Prebuilt views which increasese reusability , Create, Update, Delete views
+
+
 Explain what the following Django model code does? What's the relationship between topping and pizza?
 class Topping(models.Model):
+
 class Pizza(models.Model):
     toppings = models.ManyToManyField(Topping)
     
+Creates a table like below with many to many relationsshups
+pizza_topping
+id , pizza_id , topping_id
+
+
 Explain in detail, what's going on in the three paths through this Django form view processing code.
 def contact(request):
     if request.method == 'POST': 
@@ -67,75 +230,195 @@ def contact(request):
         'form': form,
     })
     
+
 What is a signal in Django? Where might you use one? What's the difference between send() and send_robust()? When might you use one over the other?
+Django includes a “signal dispatcher” which helps allow decoupled applications get notified when actions occur elsewhere in the framework.
+In a nutshell, signals allow certain senders to notify a set of receivers that some action has taken place
+send() differs from send_robust() in how exceptions raised by receiver functions are handled. send() does not catch any exceptions raised by receivers; it simply allows errors to propagate. Thus not all receivers may be notified of a signal in the face of an error.
+send_robust() catches all errors derived from Python’s Exception class, and ensures all receivers are notified of the signal. If an error occurs, the error instance is returned in the tuple pair for the receiver that raised the error.
+
 What does the following code do? What's another way of doing the same thing?
-@receiver(request_finished) def my_callback(sender, **kwargs):
+@receiver(request_finished) 
+def my_callback(sender, **kwargs):
+
+request_finished.connect(my_callback
+
 Complete the following Django form to include:
-class ContactForm(forms.Form): message = forms.CharField()
+class ContactForm(forms.Form): 
+    message = forms.CharField()
+
+
+
 If you have access to a function that returns a random integer from one to five, write another function which returns a random integer from one to seven.
+
 Discuss an algorithm to traverse a tree, depth first.
+
+
 Describe a schema (or classes) to power an online car rental system. Describe the tables and the relationships beween the tables.
+
+class Vehicle(models.Model):
+    vehicle_id = models.IntegerField(primary_key=True)
+    registration_number
+    model
+    engine capacity
+    color
+    chassis_number
+
+
+class User(models.Model):
+    user_id = models.ForeignKey(User)
+    Address
+    card_details
+
+
+class Rental(models.Model):
+    days
+    time_of registration
+    vehicle_id foreigh key 
+    user_id foreign key
+    returned
+
+
+
 Construct a regular expression that matches a valid email address.
+^[\w-\.]+@([\w-]+\.)+[\w]{2,3}$
+
 Implement a function with signature find_chars(string1, string2) that takes two strings and returns a string that contains only the characters found in string1 and string two in the order that they are found in string1. Implement a version of order N*N and one of order N.
+
 Explain what a deadlock is in multithreaded programming
+When each thread is waiting for a resource to be released which is help by other thread and they wait in this fashion indefinitely creating a deadlock.
+Eg: Class ic sandwich problen with A holding bread and B holid knofe and waiting for each others resources
+
 Given a circular list of integers (when you reach the end of the list you come back to the beginning), what is the most efficient algorithm to find the smallest integer in the list?
+Assign a pointer to current node and start terating and comparing each number to smaller number till now, once u reach the pointer again exit loop
+
 For example: circular_list = [22, 52, 66, 82, 5, 8, 12, 19].
-Given a N by N matrix of both negative and positive integers. Write an efficient algorithm to find the sub-matrix with the largest sum of all the contained elements.
+
+Given a N by N matrix of both negative and positive integers. Write an efficient algorithm to find the sub-matrix with the largest sum of all the 
+contained elements.
+
+
 Implement a function to divide two integers without using the divide operator.
-Design a system to efficiently calculate the top 1MM Google search queries and create a report of these. Additionally:
-Given an array A[N] containing N numbers. Crate an array Output[N] where Output[i] is equal to the product of all the elements of A[N] except A[i].
-For example Output[0] is the product of A[1] to A[N-1] and Output[1] is the product of A[0] and from A[2] to A[N-1].
-Do this without using the division operator. Do it in O(n).
+    def(divident,divisor):
+        while dividend >0:
+            divident-=divisor
+            k+=1
+        return k 
+
+
+Design a system to efficiently calculate the top 1MM Google search queries and create a report of these. 
+
+
 You are given a linked list of integers of length N.
 N is very large and you donâ€™t know N.
 Write a function to return k completely random numbers from the list.
 Do this in O(n).
 Hint: Use random function rand() (returns a number between 0 and 1) and irand() (return either 0 or 1) 2.
+In [94]: l
+Out[94]: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+In [95]: l2
+Out[95]: [9, 6, 5, 7]
+
+In [96]: for i in range(len(l)):
+    l2[random.randint(0,3)]= l[i]
+
+
 Write a function to efficiently determine the result of a game of Tic Tac Toe.
 The function takes as input the game and the sign (x or o) of the player. The function returns if this player has won the game or not.
-Carefully consider both the data structure and the algorithm for your answer.
-Efficiently calculate the shortest distance between two Facebook users given an API endpoint that returns all friends of a given user.
+winner_list = [[1, 2, 3], [4, 5, 6], [7, 8, 9], \
+[1, 4, 7], [2, 5, 8], [3, 6, 9], \
+[1, 5, 9], [3, 5, 7]]
+
+
+X=[1, 7, 8, 9]
+for winner in winner_list:
+if set(winner).issubset(set(X)):
+print "Is a winner", winner
+
 Given any integer, efficiently find the next highest integer that uses the same digits.
-For example if the number is 15432, you should return 21345.
+convert interget to string
+user permutation on this string
+join the string convert back to integer
+get a subset by compainr and find all number greater than inpit number
+use min to get the number.
+
 Write a function that takes an integer and returns the smallest number that is greater than the given number which is a palendrome.
-For example, if the input was 111 the next palindromic number would be 121.
+
 Write a function, tokenize_string(input_string, delimiter_list) that returns a list of strings that are separated by the delimiters.
 For example: tokenize_string("How now, Mrs. Brown Cow") returns ['How', 'now', 'Mrs', 'Brown', 'Cow']
+
 Write a function that takes as input a sorted array and modifies the array to compact it, removing duplicates. Also return the new length of the array.
 Notes: The input array might be very large.
-For example:
-Given two arrays of strings, A and B.
-B contains every element in A, and has one additional member, for example:
-Write a function to find the extra string in B. Do this in O(n)
-Express the following table as a static structure, and write a function, find_routes(source, destination) that efficiently outputs all possible routes.
-The solution for find_routes('Seattle', 'Florida') should be [Seattle -> Florida, Seattle -> LA -> Florida]
-Write a function to efficiently convert a floating point number to a rational number. For example, given 0.125 return "1/8"
+for i in l:
+    if l[i+1]>l[i]:
+        print l[i]
+    else:
+        continue
+
+else just use set function
+
+
 Write a function that takes an unsorted integer array, and returns a three element subset whose sum is zero.
-Note: This is a special case of the SUBSET-SUM problem. That problem is NP-complete, but we're only looking for subsets of 3 elements. This can be achieved in polynomial time.
-Write a function that takes as input a string, and outputs that same string, with any parentheses in it balanced. Do this using the minimum number of edits.
+Note: This is a special case of the SUBSET-SUM problem. That problem is NP-complete, but we're only looking for subsets of 3 elements. This can be 
+achieved in polynomial time.
+
+In [150]: l
+Out[150]: [1, 2, 3, -4, 2, 0, 7, -4, 4]
+
+In [151]: for i in list(itertools.combinations(l,2)):
+    if sum(i) ==0 :
+        print i
+
+
 Write a function that takes an array of integers and returns that array rotated by N positions.
-For example, if N=2, given the input array [1, 2, 3, 4, 5, 6] the function should return [5, 6, 1, 2, 3, 4]
-The least common multiple of a set of integers is the smallest positive integer that is a multiple of all of the integers in the set.
+In [165]: d
+Out[165]: deque([9, 0, 1, 2, 3, 4, 5, 6, 7, 8])
+
+In [166]: d.rotate(3)
+
+In [167]: d
+Out[167]: deque([6, 7, 8, 9, 0, 1, 2, 3, 4, 5])
+
+
 Write a function that takes an array of integers and efficiently calculates and returns the LCM.
-Write a function that takes as input a binary tree, and returns the length of the longest path.
-For example, in this binary tree:
-the answer is 2, since the path from vertex 1 to vertex 5 involves two edge traversals.
-Write function that takes a binary tree and efficiently returns the Nth smallest element.
-For example, if N=4, and the tree looks like:
-The function should return 4.
-Write a function that takes as input two numbers represented as strings, and returns the product of the numbers of a string.
-The numbers can be arbitrarily large.
-Write a function that takes as input a binary tree, and prints out each level of the tree on a newline. For example:
-will output:
+def lcm(x, y):
+   """This function takes two
+   integers and returns the L.C.M."""
+
+   # choose the greater number
+   if x > y:
+       greater = x
+   else:
+       greater = y
+
+   while(True):
+       if((greater % x == 0) and (greater % y == 0)):
+           lcm = greater
+           break
+       greater += 1
+
+   return lcm
+
+
+
 Given a file of size 1TB, containing only 32 bit integers, describe how you would efficiently sort it. You have only 2GB of memory available.
+
+
 Explain the terms "coupling" and "Cohesion". Is low coupling and high cohesion desirable? Why?
+
 Model the animal kingdom as a set of classes. Discuss the species, their behavior and properties.
+
 Explain the principles of test drive development.
+
 What is an abstract class and when might you use one?
+
 Describe the singleton design pattern and how you might use it in practice.
-Implement it.
+
 Describe the MVC design pattern and how you might use it in practice.
-Implement it.
+
 Write a function to return the Nth number of Fibonacci sequence.
+
 Design the schema or the classes to implement a library for building card games with. This library should make it easy to build games like Rummy, Poker, Hearts, Whist etc.
+
 Outline the implementation for two of the most important methods of the Deck class.

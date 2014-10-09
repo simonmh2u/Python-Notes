@@ -774,3 +774,104 @@ $ python itertools_groupby.py
 **XML Parsing**
 
 C implementation in xml.etree.cElementTree is faster.
+**XML**
+
+Simple example : 
+from xml.etree import ElementTree
+with open(’podcasts.opml’, ’rt’) as f:
+	tree = ElementTree.parse(f)
+
+
+
+for node in tree.iter():
+	print node.tag, node.attrib, node.text
+	print node.attrib.get('id') # gives values of id attribure
+
+
+for node in tree.findall('.//book/author'):  # This loops only within the book tag instead of goin thru whole doc
+    print node.tag, nide.text
+
+
+The items returned by findall() and iter() are Element objects, each representing a node in the XML parse
+tree
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<top>
+<child>This child contains text.</child>
+<child_with_tail>This child has regular text.</child_with_tail>And "tail" text.
+<with_attributes name="value" foo="bar" />
+<entity_expansion attribute="This &#38; That">That &#38; This</entity_expansion>
+</top>
+
+For the above document:
+from xml.etree import ElementTree
+with open(’data.xml’, ’rt’) as f:
+	tree = ElementTree.parse(f)
+
+for path in [ ’./child’, ’./child_with_tail’ ]:
+	node = tree.find(path)
+	print node.tag
+	print ’ child node text:’, node.text
+	print ’ and tail text :’, node.tail
+
+Output;
+child
+child node text: This child contains text.
+and tail text :
+child_with_tail
+child node text: This child has regular text.
+and tail text : And "tail" text.
+
+
+**Watching Events While Parsing
+The other API useful for processing XML documents is event-based. The parser generates start events for opening
+tags and end events for closing tags. Data can be extracted from the document during the parsing phase by iterating
+over the event stream, which is convenient if it is not necessary to manipulate the entire document afterwards and there
+is no need to hold the entire parsed document in memory.
+iterparse() returns an iterable that produces tuples containing the name of the event and the node triggering the
+event. Events can be one of:
+
+
+
+*Creating XML documents*
+from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+top = Element(’top’)
+comment = Comment(’Generated for PyMOTW’)
+top.append(comment)
+child = SubElement(top, ’child’)
+child.text = ’This child contains text.’
+child_with_tail = SubElement(top, ’child_with_tail’)
+child_with_tail.text = ’This child has regular text.’
+child_with_tail.tail = ’And "tail" text.’
+child_with_entity_ref = SubElement(top, ’child_with_entity_ref’)
+child_with_entity_ref.text = ’This & that’
+print tostring(top)
+
+
+Settning attribs:
+podcast = SubElement(current_group, ’outline’,
+{’text’:podcast_name,
+’xmlUrl’:xml_url,
+’htmlUrl’:html_url,
+})
+
+*Multiple children can be added to an Element instance with the extend() method. The argument to extend()
+is any iterable, including a list or another Element instance.
+from xml.etree.ElementTree import Element, tostring
+from ElementTree_pretty import prettify
+top = Element(’top’)
+children = [
+Element(’child’, num=str(i))
+for i in xrange(3)
+]
+top.extend(children)
+print prettify(top)
+
+When working with large amounts of data, it will take less memory and make more efficient use of the
+I/O libraries to write directly to a file handle using the write() method of ElementTree.
+ElementTree(top).write(sys.stdout)
+
+
+
+
