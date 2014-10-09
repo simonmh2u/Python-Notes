@@ -771,3 +771,6 @@ $ python itertools_groupby.py
 
 **Fabric**
 
+**XML Parsing**
+
+C implementation in xml.etree.cElementTree is faster.
