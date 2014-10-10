@@ -486,6 +486,8 @@ things = db.things
 things.insert({...}) # this will write it to primary
 
 
+MongoReplicaSetClient can be used to connect to replica set 
+
 
 *DUMPING and RESTORING*
 mongodump --host HOST_NAME --port PORT_NUMBER	This commmand will backup all databases of specified mongod instance.	mongodump --host tutorialspoint.com --port 27017
@@ -597,3 +599,5 @@ Write concern:
 w = 1 , j= 0 means wait for ack from mongo that it received the request frmo app
 w = 1 , j = 1 means wait for ack after the changes are written to the journal log.
 w = 0 , j = 0 , just fire and forget which is the default behaviour.
+
+w = 'majority' can be used as well which means wait for write ack from majority of the nodes.
