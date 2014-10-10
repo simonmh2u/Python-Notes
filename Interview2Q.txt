@@ -21,8 +21,7 @@ class Manufacturer(models.Model):
     country = models.Charfield(max_length=30)
 
 class Car(models.Model):
-    colorfields = ('red','green','pink','blue')
-    name = models.Charfield(primary_key=True)
+    colorfields = ('red','green','pink','blue')    name = models.Charfield(primary_key=True)
     engine_capacity = models.Integerfield()
     color = models.Charfield(choices=colorfields)
     manufacturer_name = models.Foreignkey(Manufacturer)
@@ -405,9 +404,21 @@ def lcm(x, y):
 Given a file of size 1TB, containing only 32 bit integers, describe how you would efficiently sort it. You have only 2GB of memory available.
 
 
+Read a huge file in chunks:
+In [1]: def readfiles(f1,size=1024):
+   ...:     data = f1.read(size)
+   ...:     if data:
+   ...:         yield data
+
+
 Explain the terms "coupling" and "Cohesion". Is low coupling and high cohesion desirable? Why?
+Cohesion refers to what the class (or module) will do. Low cohesion would mean that the class does a great variety of actions and is not focused on what it should do. High cohesion would then mean that the class is focused on what it should be doing, i.e. only methods relating to the intention of the class.
+As for coupling, it refers to how related are two classes / modules and how dependent they are on each other. Being low coupling would mean that changing something major in one class should not affect the other. High coupling would make your code difficult to make changes as well as to maintain it, as classes are coupled closely together, making a change could mean an entire system revamp.
 
 Model the animal kingdom as a set of classes. Discuss the species, their behavior and properties.
+vertebrates -- > Mammals , Fish, Reptiles , amphibous , Birds
+Invertebreates - .worms , insects
+
 
 Explain the principles of test drive development.
 
@@ -418,7 +429,14 @@ Describe the singleton design pattern and how you might use it in practice.
 Describe the MVC design pattern and how you might use it in practice.
 
 Write a function to return the Nth number of Fibonacci sequence.
+In [13]: def fibb(n,m):
+    l=[];x,y=0,1
+    for i in range(n):
+        x,y=y,x+y
+        l+= [y]
+    return l[m]
 
-Design the schema or the classes to implement a library for building card games with. This library should make it easy to build games like Rummy, Poker, Hearts, Whist etc.
 
-Outline the implementation for two of the most important methods of the Deck class.
+
+
+

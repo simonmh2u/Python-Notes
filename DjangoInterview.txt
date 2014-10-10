@@ -1,0 +1,52 @@
+
+    What Django tools and pluggables are you using or aware of? South, multilingual, tagging, profiles, registration, etc. This question is very useful in order to understand how long someone has been developing with Django.
+    What are the named url patterns? What is the url template tag and what is its usefullness?
+    Tell me about a templating system in Django. What is template inheritance? How do you get contents of a parent block?
+    What is a template tag? What is an inclusion template tag? How do you create a template tag?
+    What is ORM? Why is it useful? How does Django accomplish such functionality? What is model inheritance? What types of model inheritance are there in Django?
+    In table inheritance, how are the two tables related? (the pointer mechanism)
+    How would you internationalize Django application? (if it is important) How would you internationilize values stored in the database?
+    How do you extend a user profile in Django?
+    What is a forms framework? How do you use it to create a form? What is a shortcut way of creating a form for a model?
+    Describe signals in Django? What is their usefulness? What design pattern do they remind you of? How would you implement the above mentioned design pattern? ( My favourite question )
+
+
+
+
+What kind of calling model does Python use?
+
+    What most people say: “Python uses call-by-reference,” or, “Python uses call-by-value.”
+    What you should say: “Actually, Python uses call-by-object.”
+    Why you should say it: This question separates the veterans from the rookies, according to Wendt. Only developers with considerable hands-on experience typically know about Python’s unique calling model.
+
+Click here to find Django jobs.
+
+What is Unicode, what is UTF-8 and how do they relate?
+
+    What most people say: “Unicode has something to do with special characters, right?”
+    What you should say: “Unicode is an international encoding standard that works with different languages and scripts. It consists of letters, digits or symbols representing characters from across the world. UTF-8 is a type of encoding, a way of storing the code points of Unicode in a byte form, so you can send Unicode strings over the network or store them in files.”
+    Why you should say it: Since developers must create code for a world comprised of many cultures and languages, you should know how to develop an application that will be used by non-English speakers. Knowing about Unicode/UTF-8 shows that you understand the importance of global development protocols.
+
+How do you decide when to reuse code and when to start from scratch?
+
+    What most people say: “I typically search GitHub, Bitbucket and PyPI (Python Package Index). If I find something I like, I’ll copy the code. If I don’t find a viable solution online, I’ll create fresh code.”
+    What you should say: “Creating brand new code is a last resort. I’ll research code libraries, using several criteria to decide whether I should integrate existing code into my project. For instance, I’ll consider the quality of the code, the reputation and activity of the developer as well as the efficacy and size of the coding community. I want to know whether the developer is generating timely updates and notes, how quickly bugs are being fixed, and whether the code has received recent updates.”
+    Why you should say it: A good engineer’s goal is to write and maintain the least possible amount of code so that they can focus on other things, like making their product unique. However, the decision to incorporate existing code requires careful consideration. If you’re unable to find a quality solution online, sometimes it’s better to rethink the problem.
+
+How would you scale an existing application when starting a new project?
+
+    What most people say: “I’d use a NoSQL data store to store my data. Also, I’d cache a good portion of the data in Redis or Memcached through Django’s caching facilities. Perhaps I’d put a reverse proxy like Varnish in front of it.”
+    What you should say: “I see performance and scaling as two separate things. Performance is how fast a user is served and scaling refers to the number of users that can be served by an app at the same time. Usually, time is best spent developing during the early stages of a project. When scale does become an issue, usually business is good and there are sufficient funds to optimize the application.”
+    Why you should say it: First of all, as an engineer it’s always good to take a step back and analyze the question instead of jumping to conclusions. The best way to answer this one is by explaining what scaling is and to question whether it’s required in the early stages of a project. A good engineer asks the right questions before rendering a decision. These are the type of characteristics employers are looking for.
+
+Are there situations where you wouldn’t use Python/Django?
+
+    What most people say: “Not really. Python is a very good, generic programming language and Django has so many options, that it works for any Web application.”
+    What you should say: “Sure. For example, if a project involves some kind of reasoning it might be better to use Prolog and have Python interface with it. Of course, I would be mindful about adding more complexity to the stack by introducing a new language.”
+    Why you should say it: Every programming language or framework has its strengths and weaknesses. Good engineers don’t become emotionally attached to a language, and weigh several options before making a decision. However, they also realize that adding a new programming language increases complexity. So, they constantly ask themselves if adding another language is really worth it.
+
+
+
+
+
+http://f2finterview.com/web/Django/?page=1

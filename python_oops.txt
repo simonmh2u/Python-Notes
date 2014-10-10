@@ -99,7 +99,9 @@ sub
 *Delegating to a superclass implementation is the most frequent use of unbound methods.
 *Delegation to base class when overriding methods including for __init__ should be done explicitly in sub class else functionality present in BAse class may go missing. This kind og behaviour happens by itself in Java like languages.
 *When delegating always use super(classname,self).methodname() which will resolve Method resolution issues like same method of a common super class getting called twice.
-*classmethod must have a reference to a class object as the first parameter (cls), whereas staticmethod can have no parameters at all.
+*classmethod must have a reference to a class object as the first parameter (cls),
+With classmethods, the class of the object instance is implicitly passed as the first argument instead of self.
+ whereas staticmethod can have no parameters at all.
 *staticmethods are just normal functions just bearing a logical relationship with the class
 *Since for staticmethods the Class or instance object doesnt get passed and not required it saves resources.
 classmethods can be used for Factory methods, that are used to create an instance for a class using for example some sort of pre-processing. 

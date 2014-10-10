@@ -872,3 +872,27 @@ ElementTree(top).write(sys.stdout)
 
 
 
+*zipfile:
+
+Below gives list of zip file swithin the archive
+import zipfile
+zf = zipfile.ZipFile(’example.zip’, ’r’)
+print zf.namelist()
+
+Additinal info ; zf.getinfo(filename)
+
+Creating new arhives:
+import zipfile
+print ’creating archive’
+zf = zipfile.ZipFile(’zipfile_write.zip’, mode=’w’) #Use mode = a for appending to exisiting zip file
+try:
+print ’adding README.txt’
+zf.write(’README.txt’,compression_type='zipfile.ZIP_DEFLATED')
+finally:
+print ’closing’
+zf.close()
+
+
+tarfile module wors similar to zip file above except for a few functions lie extractall
+
+
