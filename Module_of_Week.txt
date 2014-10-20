@@ -1,4 +1,4 @@
-
+l
 *struct
 The struct module includes functions for converting between strings of bytes and native Python data types such asnumbers and strings.
 v=5 ; import struct ; s = struct.Struct('I') #Argument should be format specifier

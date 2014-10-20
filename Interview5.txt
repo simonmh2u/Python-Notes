@@ -170,7 +170,7 @@ Do not use the built-in function eval() if all you need is to convert strings to
 
 eval() also has the effect of interpreting numbers as Python expressions, so that e.g. eval('09') gives a syntax error because Python regards numbers starting with '0' as octal (base 8).
 
-ow can my code discover the name of an object?
+How can my code discover the name of an object?
 Generally speaking, it can't, because objects don't really have names. Essentially, assignment always binds a name to a value; The same is true of def and class statements, but in that case the value is a callable. Consider the following code:
 
 class A:
@@ -326,7 +326,7 @@ pass
 
 It's possible to set a default encoding in a file called sitecustomize.py that's part of the Python library. However, this isn't recommended because changing the Python-wide default encoding may cause third-party extension modules to fail.
 
-Note that on Windows, there is an encoding known as "mbcs", which uses an encoding specific to your current locale. In many cases, and particularly when working with COM, this may be an appropriate default encoding to use.
+Note that on Windows, there is an encoding known as "l", which uses an encoding specific to your current locale. In many cases, and particularly when working with COM, this may be an appropriate default encoding to use.
 
 How do I convert between tuples and lists?
 The function tuple(seq) converts any sequence (actually, any iterable) into a tuple with the same items in the same order.

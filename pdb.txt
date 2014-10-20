@@ -1,0 +1,48 @@
+import pdb ; pdb.set_trace() -- setting breakpoints
+
+n (next)
+ENTER (repeat previous)
+q (quit)
+p <variable> (print value)
+c (continue)
+l (list where you are)
+s (step into subroutine)
+r (continue till the end of the subroutine)  (return)
+! <python command> # using this command u can reset variables
+until  when typed in the loop finishes the loop 
+u - up , d = down is used to move thru up and down between stack frames
+
+
+when with pdb prompt u can use break <line no> to insert beak points , use disable 1 to disable
+break <function name> can also be used
+
+
+
+Post Mortem mode ; 
+>>> import pdb
+>>> pdb.pm(
+
+the program goes in pdm mode after a exception occurs which is uncaught
+
+*args command (abbreviated a) prints all of the arguments to the function active in the current frame
+
+clear used to delete breakpoints
+break lists breakpoints
+
+tbreak or temporary breakpoints are cleared after the first time it is hit
+
+Confitional breakpoints:
+ break 9, j>0
+
+ignore 1 -- used to ignore breakpoints
+
+
+below used to trigger commands after eraching a breakpoint
+commands 1
+print ’debug i =’, i
+print ’debug j =’, j
+print ’debug n =’, n
+end
+
+
+jump <line> used to jump 

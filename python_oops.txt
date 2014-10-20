@@ -29,7 +29,7 @@ if isinstance(x, C): type(x)._ _init_ _(x, 23) #initialisation but of 23 is done
 Implementing Singletons
 class Singleton(object):
 _singletons = {}
-def _ _new_ _(cls, *args, **kwds):
+def __new__(cls, *args, **kwds):
 if cls not in cls._singletons:
 cls._singletons[cls] = super(Singleton, cls)._ _new_ _(cls)
 return cls._singletons[cls]
@@ -66,8 +66,7 @@ x.e and x.d above get resolve in Step 2
 x.c and x.b get progress fully thorough 3 steps and get resolved in Step 1 of class resolution
 x.a gets resolved in Step 2 of class resolution.
 
-*The key difference between unbound and
-bound methods is that an unbound method is not associated with a particular
+*The key difference between unbound and bound methods is that an unbound method is not associated with a particular
 instance while a bound method is.
 
 *An unbound method has three attributes in addition to those of the
@@ -91,7 +90,7 @@ In [97]: class C(A):
 In [101]: class D(B,C):
    .....:     pass
 In [102]: D.__mro__
-Out[102]: (__main__.D, __main__.B, __main__.C, __main__.A, object)
+Out[102]: (__main__.D, __main__.B, __main__.C, __main__.A, object)l
 In [103]: a = D()
 In [104]: a.m1()
 sub
