@@ -27,7 +27,7 @@ Care should be taken in your templates to ensure that any document type declarat
 MOdels : 
 New models will be synchronised with syncdb - but changes to existing models will not be.
 When updating an existing model to your application’s models.py file, you must perform the following steps.
-Delete the database.
+Delete the database. 
 Recreate the database with the command $ python manage.py syncdb.
 Populate the new database with data.
 python manage.py syncdb command used to create models on the databse.
@@ -1335,3 +1335,73 @@ Example:
 >>> b.entry_set.count()
 
 
+
+
+**************QUERY SET API************
+
+*annotate(*args, **kwargs)
+Annotates each object in the QuerySet with the provided list of aggregate values (averages, sums, etc) that have been computed over the objects that are related to the objects in the QuerySet
+
+
+*filter(**kwargs)
+Returns a new QuerySet containing objects that match the given lookup parameters.
+
+exclude(**kwargs)
+Returns a new QuerySet containing objects that do not match the given lookup parameters.
+
+*order_by(*fields)
+Entry.objects.filter(pub_date__year=2005).order_by('-pub_date', 'headline')
+Entry.objects.order_by('?') -->oder randnly
+
+Entry.objects.order_by('blog__name', 'headline') --ordering by diffrenct model attibute
+
+*reverse()
+my_queryset.reverse()[:5]
+
+
+*distinct([*fields])
+Returns a new QuerySet that uses SELECT DISTINCT in its SQL query. This eliminates duplicate rows from the query results.
+Ex:
+>>> Author.objects.distinct()
+
+>>> Entry.objects.order_by('pub_date').distinct('pub_date')
+  
+*values(*fields
+Returns a ValuesQuerySet — a QuerySet subclass that returns dictionaries when used as an iterable, rather than model-instance objects.
+>>> Blog.objects.filter(name__startswith='Beatles').values()
+[{'id': 1, 'name': 'Beatles Blog', 'tagline': 'All the latest Beatles news.'}]
+>>> Blog.objects.values()
+[{'id': 1, 'name': 'Beatles Blog', 'tagline': 'All the latest Beatles news.'}],
+>>> Blog.objects.values('id', 'name')
+[{'id': 1, 'name': 'Beatles Blog'}]
+
+*values_list(*fields)
+This is similar to values() except that instead of returning dictionaries, it returns tuples when iterated over
+
+
+*select_related()
+Returns a QuerySet that will automatically “follow” foreign-key relationships, selecting that additional related-object data when it executes its query
+
+# Hits the database.
+e = Entry.objects.select_related().get(id=5)
+
+# Doesn't hit the database, because e.blog has been prepopulated
+# in the previous query.
+b = e.blog
+
+
+*extra(select=None, where=None, params=None, tables=None, order_by=None, select_params=None)
+Sometimes, the Django query syntax by itself can’t easily express a complex WHERE clause. For these edge cases, Django provides the extra() QuerySet modifier
+    
+*defer(*fields)
+In some complex data-modeling situations, your models might contain a lot of fields, some of which could contain a lot of data (for example, text fields), or require expensive processing to convert them to Python objects. If you are using the results of a queryset in some situation where you don’t know if you need those particular fields when you initially fetch the data, you can tell Django not to retrieve them from the database.
+This is done by passing the names of the fields to not load to defer():
+Entry.objects.defer("headline", "body"
+
+Entry.objects.defer("body").filter(rating=5).defer("headline")
+Blog.objects.select_related().defer("entry__headline", "entry__body")
+
+
+
+
+    
